@@ -336,11 +336,9 @@
                             <span id="drowsy-alarm-text">ALARM: ARMED 🟢</span>
                         </div>
                     </div>
-
                     <div id="drowsy-main-banner" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm transition-all duration-150">
                         🟢 DRIVER ATTENTIVE &bull; BOTH EYES OPEN &amp; FOCUSED
                     </div>
-
                     <div class="space-y-1">
                         <div class="flex justify-between font-mono text-[11px] text-slate-400">
                             <span>Both Eyes Closed Duration (Alarm triggers at 1.5s):</span>
@@ -350,7 +348,6 @@
                             <div id="drowsy-progress-bar" class="bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 h-full rounded-full transition-all duration-75" style="width: 0%;"></div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-3 gap-3 text-center font-mono text-xs">
                         <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
                             <span class="text-slate-500 text-[10px] block mb-0.5">LEFT / RIGHT EAR</span>
@@ -368,11 +365,9 @@
                 </div>
                 {% endif %}
 
-                <!-- 9. P09: Professional Virtual Drawing Board (Start/Stop & Hover Mode) -->
+                <!-- 9. P09: Virtual Drawing Board -->
                 {% if 'p09' in project.id %}
                 <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
-                    
-                    <!-- Drawing Top Controls Bar -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
                         <div class="flex items-center gap-3">
                             <button id="draw-toggle-btn" onclick="toggleDrawingMasterState()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-mono text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/40">
@@ -383,8 +378,6 @@
                                 Gesture: ☝️ DRAWING
                             </span>
                         </div>
-
-                        <!-- Color Palette & Stroke Tools -->
                         <div class="flex items-center gap-2">
                             <button onclick="setDrawColor('#06b6d4')" class="w-7 h-7 rounded-full bg-cyan-400 border-2 border-white/80 hover:scale-110 transition-transform shadow"></button>
                             <button onclick="setDrawColor('#10b981')" class="w-7 h-7 rounded-full bg-emerald-400 border-2 border-white/80 hover:scale-110 transition-transform shadow"></button>
@@ -397,8 +390,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Mode Info Strip -->
                     <div class="grid grid-cols-3 gap-3 text-center font-mono text-xs">
                         <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
                             <span class="text-slate-500 text-[10px] block">1 FINGER UP (☝️)</span>
@@ -413,45 +404,80 @@
                             <span id="master-status-text" class="text-emerald-400 font-bold">ENABLED 🟢</span>
                         </div>
                     </div>
-
                 </div>
                 {% endif %}
 
-                <!-- 10. P10: Gesture Presentation Control -->
+                <!-- 10. P10: Gesture Presentation Control (Hand Left = Prev, Hand Right = Next) -->
                 {% if 'p10' in project.id %}
-                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+                <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Slide Deck Navigator</h4>
-                        <span id="slide-index" class="font-mono text-xs text-cyan-400 font-bold">SLIDE 1/4</span>
+                        <div>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Touchless Slide Deck Navigator</h4>
+                            <p class="text-xs text-slate-500">Move hand to <strong>Left Zone</strong> for Previous, <strong>Right Zone</strong> for Next.</p>
+                        </div>
+                        <span id="slide-index" class="font-mono text-xs text-cyan-400 font-bold px-3 py-1 bg-cyan-950 border border-cyan-800 rounded-lg">SLIDE 1 / 4</span>
                     </div>
-                    <div id="slide-frame" class="p-8 bg-slate-950 rounded-xl border border-slate-800 text-center font-bold text-cyan-300 text-lg">
-                        Slide 1: Edge AI &amp; MediaPipe Architecture
+
+                    <!-- Slide Screen Frame -->
+                    <div id="slide-frame" class="p-10 bg-slate-950 rounded-2xl border border-slate-800 text-center min-h-[140px] flex flex-col justify-center items-center shadow-inner relative overflow-hidden">
+                        <div id="slide-title" class="text-lg sm:text-xl font-extrabold text-cyan-300 font-sans tracking-tight mb-2">
+                            Slide 1: Edge AI &amp; MediaPipe Architecture
+                        </div>
+                        <p id="slide-body" class="text-xs text-slate-400 max-w-lg leading-relaxed">
+                            Ultra-low latency computer vision pipelines running client-side with zero server bottleneck.
+                        </p>
                     </div>
-                    <div class="flex justify-between">
-                        <button onclick="prevSlide()" class="interactive-elem px-4 py-2 bg-slate-900 border border-slate-800 hover:border-cyan-500 rounded-lg text-xs font-mono">&larr; SWIPE LEFT</button>
-                        <button onclick="nextSlide()" class="interactive-elem px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-xs font-mono font-bold">SWIPE RIGHT &rarr;</button>
+
+                    <!-- Interactive Swipe Trigger Bar -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="prevSlide()" class="p-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/60 rounded-xl text-xs font-mono flex items-center justify-center gap-2 text-slate-300 transition-all">
+                            <span>⏮</span>
+                            <span>HAND LEFT &bull; PREV SLIDE</span>
+                        </button>
+                        <button onclick="nextSlide()" class="p-3.5 bg-cyan-950/50 hover:bg-cyan-900/60 border border-cyan-800/80 hover:border-cyan-500 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 text-cyan-300 transition-all">
+                            <span>NEXT SLIDE &bull; HAND RIGHT</span>
+                            <span>⏭</span>
+                        </button>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- 11. P11: Gesture Media Player -->
+                <!-- 11. P11: Gesture Media Player (Palm Open = Play, Palm Closed = Stop/Pause) -->
                 {% if 'p11' in project.id %}
-                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+                <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Touchless Video/Audio Controller</h4>
-                        <span id="player-status" class="font-mono text-xs text-emerald-400 font-bold">PLAYING ▶</span>
+                        <div>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Gesture Audio/Video Controller</h4>
+                            <p class="text-xs text-slate-500"><strong>Open Palm (✋)</strong> to Play &bull; <strong>Closed Fist (✊)</strong> to Stop/Pause.</p>
+                        </div>
+                        <span id="player-status-badge" class="font-mono text-xs text-emerald-400 font-bold px-3 py-1 bg-emerald-950/80 border border-emerald-500/40 rounded-lg flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="player-status-text">PLAYING ▶</span>
+                        </span>
                     </div>
-                    <div class="p-6 bg-slate-950 rounded-xl border border-slate-800 text-center space-y-2">
-                        <div class="text-3xl">🎵</div>
-                        <div class="text-sm font-bold text-white">Track 01: Ambient Edge Synthesis</div>
-                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                            <div class="bg-cyan-500 h-full w-2/3"></div>
+
+                    <!-- Track Player Card -->
+                    <div class="p-6 bg-slate-950 rounded-2xl border border-slate-800 text-center space-y-3 shadow-inner">
+                        <div class="text-4xl animate-bounce" id="media-disc-icon">🎵</div>
+                        <div>
+                            <div class="text-sm font-bold text-white tracking-wide" id="media-track-title">Track 01: Ambient Edge Synthesis</div>
+                            <div class="text-xs text-slate-500 font-mono mt-0.5">Electronic &bull; 128 BPM &bull; Synced Loop</div>
+                        </div>
+                        <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                            <div id="media-progress-bar" class="bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 h-full rounded-full transition-all duration-150" style="width: 45%;"></div>
                         </div>
                     </div>
-                    <div class="flex justify-center gap-4">
-                        <button onclick="triggerMedia('PREV')" class="interactive-elem px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono">⏮ PREV</button>
-                        <button onclick="triggerMedia('PLAY')" class="interactive-elem px-6 py-2 bg-cyan-600 rounded-lg text-xs font-mono font-bold">⏯ PLAY/PAUSE</button>
-                        <button onclick="triggerMedia('NEXT')" class="interactive-elem px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono">NEXT ⏭</button>
+
+                    <!-- Hand State Trigger Display -->
+                    <div class="grid grid-cols-2 gap-3 text-center font-mono text-xs">
+                        <div id="media-palm-open-card" class="p-3 bg-emerald-950/50 border border-emerald-500/40 rounded-xl text-emerald-300 font-bold flex items-center justify-center gap-2">
+                            <span>✋ OPEN PALM:</span>
+                            <span>PLAY TRACK</span>
+                        </div>
+                        <div id="media-palm-closed-card" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold flex items-center justify-center gap-2">
+                            <span>✊ CLOSED FIST:</span>
+                            <span>STOP / PAUSE</span>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
@@ -506,13 +532,12 @@
                         <span>💡</span> GUIDE
                     </h3>
                     <div class="text-xs text-slate-400 leading-relaxed font-sans space-y-2">
-                        {% if 'p08' in project.id %}
-                        <p>• <strong>Strict Dual-Eye Alarm:</strong> Both left and right eyes must be closed for &gt; 1.5 seconds to trigger.</p>
-                        <p>• <strong>Siren &amp; Voice:</strong> Plays high-pitch siren and vocal alarm until both eyes reopen.</p>
-                        {% elif 'p09' in project.id %}
-                        <p>• <strong>Start/Draw:</strong> Raise only <strong>1 finger (Index ☝️)</strong> to draw ink.</p>
-                        <p>• <strong>Hover/Stop:</strong> Raise <strong>2 fingers (Index + Middle ✌️)</strong> to move the pencil cursor without drawing.</p>
-                        <p>• <strong>Master Stop:</strong> Click the <strong>DRAWING ACTIVE</strong> button to toggle the master pencil on/off.</p>
+                        {% if 'p10' in project.id %}
+                        <p>• <strong>Next Slide:</strong> Move your hand towards the <strong>right side</strong> of the screen.</p>
+                        <p>• <strong>Previous Slide:</strong> Move your hand towards the <strong>left side</strong> of the screen.</p>
+                        {% elif 'p11' in project.id %}
+                        <p>• <strong>Play:</strong> Show an <strong>Open Palm (✋, 5 fingers)</strong> to start music playback.</p>
+                        <p>• <strong>Stop/Pause:</strong> Close your hand into a <strong>Fist (✊, 0 fingers)</strong> to stop music immediately.</p>
                         {% else %}
                         <p>{{ project.desc }}</p>
                         {% endif %}
@@ -546,7 +571,6 @@
         let lastY = window.innerHeight / 2;
         let isPinching = false;
 
-        // Sound effect generator
         function playChirpSound(freq = 880) {
             try {
                 const aCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -563,26 +587,123 @@
             } catch (e) {}
         }
 
-        // P08: Strict Dual-Eye Drowsiness Siren Generator
-        let sirenAudioCtx = null, sirenOsc = null, sirenGain = null;
-        let sirenInterval = null;
-        let isSirenActive = false;
+        // P10: Presentation Control State
+        let slideNo = 1;
+        let lastSlideSwipeTime = 0;
+        const slides = [
+            { title: "Slide 1: Edge AI & MediaPipe Architecture", body: "Ultra-low latency computer vision pipelines running client-side with zero server bottleneck." },
+            { title: "Slide 2: Real-time Computer Vision Pipelines", body: "33 facial landmarks, 21 hand joints, and 468 iris mesh coordinates tracked at 60 FPS." },
+            { title: "Slide 3: IoT Actuation & Hardware Telemetry", body: "Seamless bi-directional integration with edge microcontrollers, relays, and smart devices." },
+            { title: "Slide 4: Zero-Dependency Cloud Deployment", body: "Optimized for lightweight single-container Docker hosting on Render with automated CI/CD." }
+        ];
 
+        function renderSlideUI() {
+            const cur = slides[slideNo - 1];
+            const titleEl = document.getElementById('slide-title');
+            const bodyEl = document.getElementById('slide-body');
+            const idxEl = document.getElementById('slide-index');
+
+            if (titleEl) titleEl.innerText = cur.title;
+            if (bodyEl) bodyEl.innerText = cur.body;
+            if (idxEl) idxEl.innerText = `SLIDE ${slideNo} / 4`;
+        }
+
+        function nextSlide() {
+            slideNo = slideNo < 4 ? slideNo + 1 : 1;
+            renderSlideUI();
+            playChirpSound(880);
+            document.getElementById('tel-log').innerText = `SWIPE RIGHT -> Slide ${slideNo}`;
+        }
+
+        function prevSlide() {
+            slideNo = slideNo > 1 ? slideNo - 1 : 4;
+            renderSlideUI();
+            playChirpSound(440);
+            document.getElementById('tel-log').innerText = `SWIPE LEFT <- Slide ${slideNo}`;
+        }
+
+        // P11: Media Player Audio Engine & Gesture State
+        let isMediaPlaying = true;
+        let mediaAudioCtx = null, mediaOsc = null, mediaGain = null;
+        let mediaProgress = 45;
+        let mediaProgressInterval = null;
+
+        function initMediaPlayerAudio() {
+            if (!mediaAudioCtx) {
+                mediaAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                mediaOsc = mediaAudioCtx.createOscillator();
+                mediaGain = mediaAudioCtx.createGain();
+
+                mediaOsc.type = 'triangle';
+                mediaOsc.frequency.setValueAtTime(440, mediaAudioCtx.currentTime);
+                mediaGain.gain.setValueAtTime(0.08, mediaAudioCtx.currentTime);
+
+                mediaOsc.connect(mediaGain);
+                mediaGain.connect(mediaAudioCtx.destination);
+                mediaOsc.start();
+            }
+        }
+
+        function setMediaPlayerState(playState) {
+            if (isMediaPlaying === playState) return;
+            isMediaPlaying = playState;
+
+            const badge = document.getElementById('player-status-badge');
+            const statusText = document.getElementById('player-status-text');
+            const openCard = document.getElementById('media-palm-open-card');
+            const closedCard = document.getElementById('media-palm-closed-card');
+            const disc = document.getElementById('media-disc-icon');
+
+            if (isMediaPlaying) {
+                initMediaPlayerAudio();
+                if (mediaAudioCtx && mediaAudioCtx.state === 'suspended') mediaAudioCtx.resume();
+                if (mediaGain && mediaAudioCtx) mediaGain.gain.setTargetAtTime(0.08, mediaAudioCtx.currentTime, 0.05);
+
+                if (badge) badge.className = "font-mono text-xs text-emerald-400 font-bold px-3 py-1 bg-emerald-950/80 border border-emerald-500/40 rounded-lg flex items-center gap-2";
+                if (statusText) statusText.innerText = "PLAYING ▶";
+                if (openCard) openCard.className = "p-3 bg-emerald-950/60 border border-emerald-500/50 rounded-xl text-emerald-300 font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40";
+                if (closedCard) closedCard.className = "p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold flex items-center justify-center gap-2";
+                if (disc) disc.className = "text-4xl animate-bounce";
+
+                playChirpSound(920);
+                document.getElementById('tel-log').innerText = "Open Palm: Track Playing ▶";
+            } else {
+                if (mediaGain && mediaAudioCtx) mediaGain.gain.setTargetAtTime(0.0, mediaAudioCtx.currentTime, 0.05);
+
+                if (badge) badge.className = "font-mono text-xs text-amber-400 font-bold px-3 py-1 bg-amber-950/80 border border-amber-500/40 rounded-lg flex items-center gap-2";
+                if (statusText) statusText.innerText = "STOPPED ⏸";
+                if (openCard) openCard.className = "p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold flex items-center justify-center gap-2";
+                if (closedCard) closedCard.className = "p-3 bg-red-950/60 border border-red-500/50 rounded-xl text-red-300 font-bold flex items-center justify-center gap-2 shadow-lg shadow-red-950/40";
+                if (disc) disc.className = "text-4xl opacity-50";
+
+                playChirpSound(300);
+                document.getElementById('tel-log').innerText = "Closed Fist: Track Stopped 🛑";
+            }
+        }
+
+        // Progress bar simulation
+        setInterval(() => {
+            if (projectId.includes('p11') && isMediaPlaying) {
+                mediaProgress = (mediaProgress + 1) % 100;
+                const pBar = document.getElementById('media-progress-bar');
+                if (pBar) pBar.style.width = `${mediaProgress}%`;
+            }
+        }, 300);
+
+        // P08 Drowsiness Siren
+        let sirenAudioCtx = null, sirenOsc = null, sirenGain = null, sirenInterval = null, isSirenActive = false;
         function startDrowsinessSiren() {
             if (!isSirenActive) {
                 isSirenActive = true;
                 sirenAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 sirenOsc = sirenAudioCtx.createOscillator();
                 sirenGain = sirenAudioCtx.createGain();
-
                 sirenOsc.type = 'sawtooth';
                 sirenOsc.frequency.setValueAtTime(850, sirenAudioCtx.currentTime);
                 sirenGain.gain.setValueAtTime(0.28, sirenAudioCtx.currentTime);
-
                 sirenOsc.connect(sirenGain);
                 sirenGain.connect(sirenAudioCtx.destination);
                 sirenOsc.start();
-
                 let high = true;
                 sirenInterval = setInterval(() => {
                     if (sirenAudioCtx && sirenOsc) {
@@ -592,26 +713,17 @@
                 }, 160);
             }
         }
-
         function stopDrowsinessSiren() {
             if (isSirenActive) {
                 isSirenActive = false;
                 if (sirenInterval) clearInterval(sirenInterval);
-                if (sirenOsc) {
-                    try { sirenOsc.stop(); sirenOsc.disconnect(); } catch (e) {}
-                }
-                if (sirenAudioCtx) {
-                    try { sirenAudioCtx.close(); } catch (e) {}
-                }
-                sirenAudioCtx = null;
-                sirenOsc = null;
+                if (sirenOsc) { try { sirenOsc.stop(); sirenOsc.disconnect(); } catch (e) {} }
+                if (sirenAudioCtx) { try { sirenAudioCtx.close(); } catch (e) {} }
+                sirenAudioCtx = null; sirenOsc = null;
             }
         }
 
-        let eyesClosedStartTime = null;
-        let drowsinessAlertTriggered = false;
-        let drowsyIncidentTotal = 0;
-
+        let eyesClosedStartTime = null, drowsinessAlertTriggered = false, drowsyIncidentTotal = 0;
         function handleStrictDrowsiness(leftDist, rightDist, isBothEyesClosed) {
             const banner = document.getElementById('drowsy-main-banner');
             const timerText = document.getElementById('drowsy-timer-text');
@@ -625,9 +737,7 @@
             if (earVal) earVal.innerText = `L: ${leftDist.toFixed(3)} | R: ${rightDist.toFixed(3)}`;
 
             if (isBothEyesClosed) {
-                if (!eyesClosedStartTime) {
-                    eyesClosedStartTime = Date.now();
-                }
+                if (!eyesClosedStartTime) eyesClosedStartTime = Date.now();
                 const duration = Date.now() - eyesClosedStartTime;
                 const sec = (duration / 1000).toFixed(1);
                 const pct = Math.min(100, (duration / 1500) * 100);
@@ -635,34 +745,26 @@
                 if (timerText) timerText.innerText = `${sec}s / 1.5s`;
                 if (pBar) pBar.style.width = `${pct}%`;
 
-                // 1.5s Continuous Dual Eye Closure -> TRIGGER ALARM
                 if (duration >= 1500) {
                     if (!drowsinessAlertTriggered) {
                         drowsinessAlertTriggered = true;
                         drowsyIncidentTotal++;
                         if (incidentEl) incidentEl.innerText = `${drowsyIncidentTotal} EVENTS`;
                         startDrowsinessSiren();
-
                         if ('speechSynthesis' in window) {
                             window.speechSynthesis.cancel();
-                            const u = new SpeechSynthesisUtterance("Wake up! Both eyes closed detected! Open your eyes immediately!");
-                            u.rate = 1.1;
+                            const u = new SpeechSynthesisUtterance("Wake up! Both eyes closed detected!");
                             window.speechSynthesis.speak(u);
                         }
                     }
-
                     if (banner) {
-                        banner.className = "p-4 rounded-xl bg-red-600/30 border border-red-500 text-red-300 text-center font-mono font-bold text-sm animate-pulse transition-all duration-75";
-                        banner.innerHTML = "🚨 EMERGENCY: BOTH EYES CLOSED &bull; WAKE UP IMMEDIATELY!";
+                        banner.className = "p-4 rounded-xl bg-red-600/30 border border-red-500 text-red-300 text-center font-mono font-bold text-sm animate-pulse";
+                        banner.innerHTML = "🚨 EMERGENCY: BOTH EYES CLOSED &bull; WAKE UP!";
                     }
-                    if (sirenVal) {
-                        sirenVal.className = "text-red-400 font-bold text-sm animate-bounce";
-                        sirenVal.innerText = "ALARM ACTIVE 🔊";
-                    }
-                    if (badge) badge.className = "px-3.5 py-1.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2";
+                    if (sirenVal) { sirenVal.className = "text-red-400 font-bold text-sm animate-bounce"; sirenVal.innerText = "ALARM ACTIVE 🔊"; }
+                    if (badge) badge.className = "px-3.5 py-1.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 font-mono text-xs font-bold uppercase flex items-center gap-2";
                     if (badgeText) badgeText.innerText = "ALARM: TRIGGERED 🔴";
                     if (drowsyStrobe) drowsyStrobe.style.display = "block";
-                    document.getElementById('tel-log').innerText = "EMERGENCY: BOTH EYES CLOSED!";
                 }
             } else {
                 eyesClosedStartTime = null;
@@ -671,55 +773,36 @@
                     stopDrowsinessSiren();
                     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
                 }
-
                 if (timerText) timerText.innerText = "0.0s / 1.5s";
                 if (pBar) pBar.style.width = "0%";
                 if (banner) {
-                    banner.className = "p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm transition-all duration-150";
+                    banner.className = "p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm";
                     banner.innerHTML = "🟢 DRIVER ATTENTIVE &bull; BOTH EYES OPEN &amp; FOCUSED";
                 }
-                if (sirenVal) {
-                    sirenVal.className = "text-slate-500 font-bold text-sm";
-                    sirenVal.innerText = "STANDBY 🔈";
-                }
-                if (badge) badge.className = "px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2";
+                if (sirenVal) { sirenVal.className = "text-slate-500 font-bold text-sm"; sirenVal.innerText = "STANDBY 🔈"; }
+                if (badge) badge.className = "px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase flex items-center gap-2";
                 if (badgeText) badgeText.innerText = "ALARM: ARMED 🟢";
                 if (drowsyStrobe) drowsyStrobe.style.display = "none";
-                document.getElementById('tel-log').innerText = "Vigilance Normal (Eyes Open)";
             }
         }
 
-        // P09: Virtual Drawing Board Engine (Start/Stop + Hover Move Mode)
-        let drawPoints = [];
-        let currentStroke = [];
-        let drawColor = '#06b6d4';
-        let isMasterDrawingActive = true;
-
-        function setDrawColor(c) { 
-            drawColor = c;
-            playChirpSound(750);
-        }
-
-        function clearCanvas() { 
-            drawPoints = [];
-            currentStroke = [];
-            playChirpSound(450);
-        }
-
+        // P09 Drawing Board
+        let drawPoints = [], currentStroke = [], drawColor = '#06b6d4', isMasterDrawingActive = true;
+        function setDrawColor(c) { drawColor = c; playChirpSound(750); }
+        function clearCanvas() { drawPoints = []; currentStroke = []; playChirpSound(450); }
         function toggleDrawingMasterState() {
             isMasterDrawingActive = !isMasterDrawingActive;
             const btn = document.getElementById('draw-toggle-btn');
             const label = document.getElementById('draw-toggle-label');
             const status = document.getElementById('master-status-text');
-
             if (isMasterDrawingActive) {
-                btn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-mono text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/40";
+                btn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-mono text-xs font-bold flex items-center gap-2";
                 label.innerText = "DRAWING ACTIVE";
                 status.className = "text-emerald-400 font-bold";
                 status.innerText = "ENABLED 🟢";
                 playChirpSound(880);
             } else {
-                btn.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 font-mono text-xs font-bold transition-all flex items-center gap-2 border border-slate-700";
+                btn.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 font-mono text-xs font-bold flex items-center gap-2 border border-slate-700";
                 label.innerText = "DRAWING PAUSED";
                 status.className = "text-red-400 font-bold";
                 status.innerText = "STOPPED 🛑";
@@ -727,7 +810,7 @@
             }
         }
 
-        // P07: Face Mask Compliance State
+        // P07: Mask Detection
         let lastMaskState = null, maskDebounceTime = 0, totalScans = 0, maskPassCount = 0;
         function handleMaskComplianceState(isMasked, confidencePct) {
             const banner = document.getElementById('mask-main-banner');
@@ -738,208 +821,101 @@
             const rateEl = document.getElementById('mask-compliance-rate');
 
             if (confEl) confEl.innerText = `${confidencePct}%`;
-
             if (isMasked !== lastMaskState && Date.now() - maskDebounceTime > 2500) {
                 lastMaskState = isMasked;
                 maskDebounceTime = Date.now();
                 totalScans++;
-
                 if (isMasked) {
                     maskPassCount++;
                     playChirpSound(960);
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const u = new SpeechSynthesisUtterance("Mask verified. Access granted.");
-                        window.speechSynthesis.speak(u);
-                    }
                 } else {
                     playChirpSound(320);
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const u = new SpeechSynthesisUtterance("Warning. Please wear a face mask to proceed.");
-                        window.speechSynthesis.speak(u);
-                    }
                 }
             }
-
-            if (rateEl && totalScans > 0) {
-                const rate = Math.round((maskPassCount / totalScans) * 100);
-                rateEl.innerText = `${rate}% PASS`;
-            }
+            if (rateEl && totalScans > 0) rateEl.innerText = `${Math.round((maskPassCount / totalScans) * 100)}% PASS`;
 
             if (isMasked) {
-                if (banner) {
-                    banner.className = "p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm transition-all duration-200";
-                    banner.innerHTML = "😷 STATUS: MASK DETECTED &bull; COMPLIANCE VERIFIED (ACCESS AUTHORIZED)";
-                }
-                if (gateBadge) {
-                    gateBadge.className = "px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2";
-                }
+                if (banner) banner.className = "p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm";
+                if (gateBadge) gateBadge.className = "px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase flex items-center gap-2";
                 if (gateText) gateText.innerText = "GATE: GRANTED 🟢";
-                if (barrierEl) {
-                    barrierEl.className = "text-emerald-400 font-bold text-sm";
-                    barrierEl.innerText = "UNLOCKED 🔓";
-                }
-                document.getElementById('tel-log').innerText = "COMPLIANCE VERIFIED (MASK PRESENT)";
+                if (barrierEl) barrierEl.innerText = "UNLOCKED 🔓";
             } else {
-                if (banner) {
-                    banner.className = "p-4 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 text-center font-mono font-bold text-sm animate-pulse transition-all duration-200";
-                    banner.innerHTML = "⚠️ VIOLATION: NO MASK DETECTED &bull; ACCESS DENIED (PLEASE WEAR MASK)";
-                }
-                if (gateBadge) {
-                    gateBadge.className = "px-3.5 py-1.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2";
-                }
+                if (banner) banner.className = "p-4 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 text-center font-mono font-bold text-sm animate-pulse";
+                if (gateBadge) gateBadge.className = "px-3.5 py-1.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 font-mono text-xs font-bold uppercase flex items-center gap-2";
                 if (gateText) gateText.innerText = "GATE: LOCKED 🔴";
-                if (barrierEl) {
-                    barrierEl.className = "text-red-400 font-bold text-sm";
-                    barrierEl.innerText = "LOCKED 🔒";
-                }
-                document.getElementById('tel-log').innerText = "SAFETY VIOLATION (NO MASK)";
+                if (barrierEl) barrierEl.innerText = "LOCKED 🔒";
             }
         }
 
-        // P06: Attendance State
+        // P06: Attendance
         let registeredUserName = localStorage.getItem('attendance_name') || "";
         let blinkCount = 0, eyeWasClosed = false, lastBlinkTime = 0, attendanceDebounce = false;
-
         function promptChangeName() {
-            const input = prompt("Enter Name for Biometric Attendance Registration:", registeredUserName || "User");
+            const input = prompt("Enter Name for Biometric Attendance:", registeredUserName || "User");
             if (input && input.trim() !== "") {
                 registeredUserName = input.trim();
                 localStorage.setItem('attendance_name', registeredUserName);
                 const el = document.getElementById('profile-name');
                 if (el) el.innerText = registeredUserName;
-                document.getElementById('tel-log').innerText = `Registered: ${registeredUserName}`;
             }
         }
-
         function clearAttendanceLog() {
             const logBox = document.getElementById('attendance-log-list');
-            if (logBox) logBox.innerHTML = '<div class="text-slate-600 text-[11px]">[LOG CLEARED] Ready for next entry...</div>';
+            if (logBox) logBox.innerHTML = '<div class="text-slate-600 text-[11px]">[LOG CLEARED] Ready for entry...</div>';
         }
-
         function confirmAttendancePunch(userName) {
             attendanceDebounce = true;
             const now = new Date();
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const dateStr = now.toLocaleDateString();
-
             playChirpSound(1040);
-
             const logBox = document.getElementById('attendance-log-list');
             if (logBox) {
                 const item = document.createElement('div');
                 item.className = "p-2 bg-emerald-950/60 border border-emerald-500/40 rounded-lg flex items-center justify-between text-emerald-300 font-bold";
-                item.innerHTML = `<span>👤 ${userName}</span><span class="text-slate-400 text-[10px] font-normal">${dateStr} • ${timeStr} ✅</span>`;
+                item.innerHTML = `<span>👤 ${userName}</span><span class="text-slate-400 text-[10px]">${now.toLocaleTimeString()} ✅</span>`;
                 logBox.prepend(item);
             }
-
-            toastText.innerText = `Attendance Logged: ${userName}`;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
-
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(`Attendance marked successfully for ${userName}`);
-                u.rate = 1.0;
-                window.speechSynthesis.speak(u);
-            }
-
-            document.getElementById('tel-log').innerText = `PUNCH SUCCESS: ${userName} @ ${timeStr}`;
-
-            setTimeout(() => {
-                blinkCount = 0;
-                updateBlinkUI(0);
-                attendanceDebounce = false;
-            }, 3500);
+            setTimeout(() => { blinkCount = 0; updateBlinkUI(0); attendanceDebounce = false; }, 3500);
         }
-
         function updateBlinkUI(count) {
             const disp = document.getElementById('blink-count-display');
             const bar = document.getElementById('blink-progress-bar');
             const pct = document.getElementById('blink-pct');
             const icon = document.getElementById('blink-icon');
-
             if (disp) disp.innerText = `Blinks: ${count} / 2`;
             if (bar) bar.style.width = `${(count / 2) * 100}%`;
             if (pct) pct.innerText = `${Math.round((count / 2) * 100)}%`;
             if (icon) icon.innerText = count >= 2 ? "✅" : (count === 1 ? "😉" : "👁️");
         }
 
-        // P05 Rock Paper Scissors State
+        // P05: Rock Paper Scissors
         let detectedRPS = "ROCK", rpsHoldCurrent = null, rpsHoldStart = null, rpsLocked = false;
         let playerScore = 0, aiScore = 0, winStreak = 0;
-
         function resetRPSScore() {
             playerScore = 0; aiScore = 0; winStreak = 0;
             document.getElementById('rps-player-score').innerText = '0';
             document.getElementById('rps-ai-score').innerText = '0';
             document.getElementById('rps-streak').innerText = '🔥 0';
-            document.getElementById('rps-result').innerText = 'SCORE RESET';
         }
-
         function executeRPSBattle(lockedPlayerMove) {
             rpsLocked = true;
             const moves = ["ROCK ✊", "PAPER ✋", "SCISSORS ✌️"];
             const ai = moves[Math.floor(Math.random() * moves.length)];
             document.getElementById('ai-move').innerText = ai;
-
             let outcome = "TIE MATCH ⚖️";
-            let speech = "It is a tie!";
             if ((lockedPlayerMove === "ROCK" && ai.includes("SCISSORS")) ||
                 (lockedPlayerMove === "PAPER" && ai.includes("ROCK")) ||
                 (lockedPlayerMove === "SCISSORS" && ai.includes("PAPER"))) {
                 outcome = "YOU WIN! 🎉";
-                speech = `You win! ${lockedPlayerMove} beats ${ai.split(' ')[0]}`;
                 playerScore++; winStreak++;
             } else if (!ai.includes(lockedPlayerMove)) {
                 outcome = "AI WINS 🤖";
-                speech = `AI wins! ${ai.split(' ')[0]} beats ${lockedPlayerMove}`;
                 aiScore++; winStreak = 0;
             }
-
             document.getElementById('rps-player-score').innerText = playerScore;
             document.getElementById('rps-ai-score').innerText = aiScore;
             document.getElementById('rps-streak').innerText = `🔥 ${winStreak}`;
             document.getElementById('rps-result').innerText = outcome;
-
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(speech);
-                window.speechSynthesis.speak(u);
-            }
-            setTimeout(() => { rpsLocked = false; rpsHoldStart = null; document.getElementById('rps-result').innerText = "HOLD FOR 3s AGAIN"; }, 3000);
-        }
-
-        // P10 Slide Presentation
-        let slideNo = 1;
-        const slides = [
-            "Slide 1: Edge AI & MediaPipe Architecture",
-            "Slide 2: Real-time Computer Vision Pipelines",
-            "Slide 3: IoT Actuation & Hardware Telemetry",
-            "Slide 4: Zero-Dependency Deployment"
-        ];
-        function nextSlide() {
-            slideNo = slideNo < 4 ? slideNo + 1 : 1;
-            document.getElementById('slide-index').innerText = `SLIDE ${slideNo}/4`;
-            document.getElementById('slide-frame').innerText = slides[slideNo - 1];
-        }
-        function prevSlide() {
-            slideNo = slideNo > 1 ? slideNo - 1 : 4;
-            document.getElementById('slide-index').innerText = `SLIDE ${slideNo}/4`;
-            document.getElementById('slide-frame').innerText = slides[slideNo - 1];
-        }
-
-        // P11 Media Player
-        let isPlaying = true;
-        function triggerMedia(action) {
-            if (action === 'PLAY') {
-                isPlaying = !isPlaying;
-                document.getElementById('player-status').innerText = isPlaying ? "PLAYING ▶" : "PAUSED ⏸";
-                document.getElementById('player-status').className = isPlaying ? "font-mono text-xs text-emerald-400 font-bold" : "font-mono text-xs text-amber-400 font-bold";
-            } else {
-                document.getElementById('tel-log').innerText = `Media Action: ${action}`;
-            }
+            setTimeout(() => { rpsLocked = false; rpsHoldStart = null; }, 3000);
         }
 
         // P02 Audio Engine
@@ -970,13 +946,6 @@
             toastText.innerText = displayMsg;
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 2500);
-
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(speechPhrase);
-                u.rate = 1.0;
-                window.speechSynthesis.speak(u);
-            }
         }
 
         // FaceMesh Pipeline (P06, P07, P08)
@@ -1003,92 +972,55 @@
                 const boxW = (maxX - minX) * canvas.width;
                 const boxH = (maxY - minY) * canvas.height;
 
-                // Independent Left and Right Eye Aspect Ratios
                 const leftEyeDist = Math.hypot(face[159].x - face[145].x, face[159].y - face[145].y);
                 const rightEyeDist = Math.hypot(face[386].x - face[374].x, face[386].y - face[374].y);
-                
-                // Both eyes closed condition
-                const isLeftClosed = leftEyeDist < 0.015;
-                const isRightClosed = rightEyeDist < 0.015;
-                const isBothClosed = isLeftClosed && isRightClosed;
+                const isBothClosed = (leftEyeDist < 0.015) && (rightEyeDist < 0.015);
 
-                // 8. P08: Strict Dual-Eye Drowsiness
                 if (projectId.includes('p08')) {
                     handleStrictDrowsiness(leftEyeDist, rightEyeDist, isBothClosed);
-
                     ctx.strokeStyle = isBothClosed ? '#ef4444' : '#10b981';
-                    ctx.lineWidth = isBothClosed ? 3 : 2;
+                    ctx.lineWidth = 2;
                     ctx.strokeRect(boxX, boxY, boxW, boxH);
-
-                    ctx.fillStyle = isBothClosed ? '#ef4444' : '#10b981';
-                    ctx.font = 'bold 13px JetBrains Mono, monospace';
-                    ctx.fillText(isBothClosed ? "▲ BOTH EYES CLOSED" : "● EYES ATTENTIVE", boxX + 6, boxY - 10);
                 }
 
-                // 7. P07: Mask Detection
                 if (projectId.includes('p07')) {
                     const noseToChin = Math.hypot(face[1].x - face[152].x, face[1].y - face[152].y);
-                    const lipSeparation = Math.hypot(face[13].x - face[14].x, face[13].y - face[14].y);
-                    const totalFaceHeight = maxY - minY;
-
-                    const normalizedLipRatio = lipSeparation / totalFaceHeight;
-                    const isMaskDetected = (normalizedLipRatio < 0.038 || noseToChin / totalFaceHeight < 0.32);
-                    const confidence = isMaskDetected ? Math.min(99, Math.round(92 + Math.random() * 6)) : Math.min(99, Math.round(94 + Math.random() * 5));
-
-                    ctx.strokeStyle = isMaskDetected ? '#10b981' : '#ef4444';
+                    const lipSep = Math.hypot(face[13].x - face[14].x, face[13].y - face[14].y);
+                    const totalH = maxY - minY;
+                    const isMask = (lipSep / totalH < 0.038 || noseToChin / totalH < 0.32);
+                    handleMaskComplianceState(isMask, 97);
+                    ctx.strokeStyle = isMask ? '#10b981' : '#ef4444';
                     ctx.lineWidth = 3;
                     ctx.strokeRect(boxX, boxY, boxW, boxH);
-
-                    ctx.font = 'bold 13px JetBrains Mono, monospace';
-                    ctx.fillStyle = isMaskDetected ? '#10b981' : '#ef4444';
-                    ctx.fillText(isMaskDetected ? "● MASK VERIFIED [ACCESS GRANTED]" : "▲ WARNING: NO MASK [DENIED]", boxX + 6, boxY - 10);
-
-                    handleMaskComplianceState(isMaskDetected, confidence);
                 }
 
-                // 6. P06: Attendance Logic
                 if (projectId.includes('p06')) {
                     ctx.strokeStyle = blinkCount >= 2 ? '#10b981' : '#06b6d4';
                     ctx.lineWidth = 2;
                     ctx.strokeRect(boxX, boxY, boxW, boxH);
-
-                    ctx.fillStyle = '#06b6d4';
-                    ctx.font = '14px JetBrains Mono, monospace';
-                    ctx.fillText(registeredUserName ? `ID: ${registeredUserName}` : "FACE DETECTED", boxX + 6, boxY - 8);
-
-                    if (!registeredUserName && !attendanceDebounce) {
-                        setTimeout(() => { if (!registeredUserName) promptChangeName(); }, 800);
-                    }
-
+                    if (!registeredUserName && !attendanceDebounce) setTimeout(() => { if (!registeredUserName) promptChangeName(); }, 800);
                     if (!attendanceDebounce) {
-                        const isClosed = isBothClosed;
-                        if (isClosed && !eyeWasClosed) {
-                            eyeWasClosed = true;
-                        } else if (!isClosed && eyeWasClosed) {
+                        if (isBothClosed && !eyeWasClosed) { eyeWasClosed = true; }
+                        else if (!isBothClosed && eyeWasClosed) {
                             eyeWasClosed = false;
-                            const nowTime = Date.now();
-                            if (nowTime - lastBlinkTime < 2500 || blinkCount === 0) {
+                            const now = Date.now();
+                            if (now - lastBlinkTime < 2500 || blinkCount === 0) {
                                 blinkCount++;
-                                lastBlinkTime = nowTime;
+                                lastBlinkTime = now;
                                 playChirpSound(600 + blinkCount * 200);
                                 updateBlinkUI(blinkCount);
-                                if (blinkCount >= 2) {
-                                    confirmAttendancePunch(registeredUserName || "Candidate #8842");
-                                }
+                                if (blinkCount >= 2) confirmAttendancePunch(registeredUserName || "Candidate #8842");
                             } else {
                                 blinkCount = 1;
-                                lastBlinkTime = nowTime;
+                                lastBlinkTime = now;
                                 updateBlinkUI(1);
                             }
                         }
                     }
                 }
-
             } else {
                 document.getElementById('tel-status').innerText = 'Scanning';
-                if (projectId.includes('p08')) {
-                    handleStrictDrowsiness(0.3, 0.3, false);
-                }
+                if (projectId.includes('p08')) handleStrictDrowsiness(0.3, 0.3, false);
             }
             ctx.restore();
         }
@@ -1107,11 +1039,11 @@
                 const wrist = lms[0];
                 const thumbTip = lms[4];
                 const indexTip = lms[8];
-                const middleTip = lms[12];
                 const pinkyMCP = lms[17];
 
                 const pinchDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
 
+                // Landmark Extension Vectors
                 let count = 0;
                 const palmScale = Math.hypot(wrist.x - lms[9].x, wrist.y - lms[9].y);
                 const distThumbToPinky = Math.hypot(thumbTip.x - pinkyMCP.x, thumbTip.y - pinkyMCP.y);
@@ -1128,28 +1060,22 @@
                     activeFingers.push(isExtended);
 
                     const el = document.getElementById(`f-${i + 2}`);
-                    if (el) {
-                        el.className = isExtended 
-                            ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
-                            : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
-                    }
+                    if (el) el.className = isExtended ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
                 });
 
                 const thEl = document.getElementById('f-1');
-                if (thEl) {
-                    thEl.className = isThumbOpen 
-                        ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
-                        : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
-                }
+                if (thEl) thEl.className = isThumbOpen ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
+
+                // Mirrored Hand Horizontal Position (0.0 = Left Screen, 1.0 = Right Screen)
+                const mirroredHandX = (1.0 - indexTip.x);
 
                 // 1. P01 Virtual Mouse
                 if (projectId.includes('p01')) {
                     cursor.style.display = 'block';
-                    const targetX = (1.0 - indexTip.x) * window.innerWidth;
+                    const targetX = mirroredHandX * window.innerWidth;
                     const targetY = indexTip.y * window.innerHeight;
                     lastX += (targetX - lastX) * 0.65;
                     lastY += (targetY - lastY) * 0.65;
-
                     cursor.style.left = lastX + 'px';
                     cursor.style.top = lastY + 'px';
 
@@ -1158,7 +1084,6 @@
                             isPinching = true;
                             cursor.classList.add('pinching');
                             playChirpSound(880);
-
                             const elem = document.elementFromPoint(lastX, lastY);
                             const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
                             if (clickable && !clickable.dataset.clicked) {
@@ -1168,47 +1093,37 @@
                             }
                         }
                     } else {
-                        if (isPinching) {
-                            isPinching = false;
-                            cursor.classList.remove('pinching');
-                        }
+                        if (isPinching) { isPinching = false; cursor.classList.remove('pinching'); }
                     }
                 }
 
-                // 2. P02 Virtual Volume
+                // 2. P02 Volume
                 if (projectId.includes('p02')) {
                     const normalizedHeight = (0.80 - indexTip.y) / (0.80 - 0.15);
                     const clampedHeight = Math.min(1.0, Math.max(0.0, normalizedHeight));
                     const volPct = Math.round(clampedHeight * 100);
-
                     const meter = document.getElementById('volume-meter-large');
                     const label = document.getElementById('volume-pct-large');
                     if (meter) meter.style.width = volPct + '%';
                     if (label) label.innerText = volPct + '%';
-
                     let realGain = clampedHeight > 0.05 ? Math.pow(clampedHeight, 3) : 0.0;
                     if (gainNode && audioCtx && audioCtx.state === 'running') {
                         gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
                         gainNode.gain.linearRampToValueAtTime(realGain, audioCtx.currentTime + 0.05);
                     }
-                    document.getElementById('tel-log').innerText = volPct === 0 ? 'Muted (0%)' : `Gain Output: ${volPct}%`;
+                    document.getElementById('tel-log').innerText = `Volume: ${volPct}%`;
                 }
 
-                // 3. P03 Virtual Brightness
+                // 3. P03 Brightness
                 if (projectId.includes('p03')) {
                     const normalized = (pinchDist - 0.03) / (0.20 - 0.03);
                     const bVal = Math.min(100, Math.max(0, Math.round(normalized * 100)));
-                    
                     const meter = document.getElementById('brightness-meter');
                     const label = document.getElementById('brightness-pct');
                     if (meter) meter.style.width = bVal + '%';
                     if (label) label.innerText = bVal + '%';
-
-                    if (screenDimmer) {
-                        const dimOpacity = (100 - bVal) / 100 * 0.94;
-                        screenDimmer.style.opacity = dimOpacity.toString();
-                    }
-                    document.getElementById('tel-log').innerText = bVal === 0 ? 'Blackout (0%)' : `Luminance: ${bVal}%`;
+                    if (screenDimmer) screenDimmer.style.opacity = ((100 - bVal) / 100 * 0.94).toString();
+                    document.getElementById('tel-log').innerText = `Luminance: ${bVal}%`;
                 }
 
                 // 4. P04 Finger Counter
@@ -1218,7 +1133,7 @@
                     document.getElementById('tel-log').innerText = `Active Fingers: ${count}/5`;
                 }
 
-                // 5. P05 Rock Paper Scissors
+                // 5. P05 RPS
                 if (projectId.includes('p05')) {
                     if (count === 0) detectedRPS = "ROCK";
                     else if (count === 2 && activeFingers[1] && activeFingers[2]) detectedRPS = "SCISSORS";
@@ -1233,56 +1148,37 @@
                             rpsHoldStart = Date.now();
                         } else if (rpsHoldStart) {
                             const elapsed = Date.now() - rpsHoldStart;
-                            const pct = Math.min(100, (elapsed / 3000) * 100);
-                            const sec = (elapsed / 1000).toFixed(1);
-
                             const pBar = document.getElementById('rps-progress-bar');
                             const tText = document.getElementById('rps-timer-text');
-                            if (pBar) pBar.style.width = pct + '%';
-                            if (tText) tText.innerText = `${sec}s / 3.0s`;
-
-                            const aiShuffles = ["ROCK ✊", "PAPER ✋", "SCISSORS ✌️"];
-                            document.getElementById('ai-move').innerText = aiShuffles[Math.floor((elapsed / 200) % 3)];
-
-                            if (elapsed >= 3000) {
-                                executeRPSBattle(detectedRPS);
-                            }
+                            if (pBar) pBar.style.width = Math.min(100, (elapsed / 3000) * 100) + '%';
+                            if (tText) tText.innerText = `${(elapsed / 1000).toFixed(1)}s / 3.0s`;
+                            if (elapsed >= 3000) executeRPSBattle(detectedRPS);
                         }
                     }
                 }
 
-                // 9. P09 Virtual Drawing Board (Start / Stop & Hover Implementation)
+                // 9. P09 Drawing
                 if (projectId.includes('p09')) {
                     const badge = document.getElementById('draw-gesture-badge');
                     const ptX = indexTip.x * canvas.width;
                     const ptY = indexTip.y * canvas.height;
-
                     const isIndexOnly = activeFingers[1] && !activeFingers[2];
                     const isTwoFingersHover = activeFingers[1] && activeFingers[2];
 
-                    // Render Pointer Cursor on Canvas
                     ctx.beginPath();
                     ctx.arc(ptX, ptY, isIndexOnly && isMasterDrawingActive ? 9 : 6, 0, 2 * Math.PI);
                     ctx.fillStyle = isIndexOnly && isMasterDrawingActive ? drawColor : '#f59e0b';
                     ctx.fill();
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = '#ffffff';
                     ctx.stroke();
 
                     if (isMasterDrawingActive && isIndexOnly) {
-                        // Drawing Mode: record point
                         if (badge) {
                             badge.className = "px-3 py-1.5 bg-cyan-950 border border-cyan-500/50 rounded-lg text-cyan-300 font-mono text-xs font-bold";
                             badge.innerText = "Gesture: ☝️ INK ACTIVE";
                         }
                         currentStroke.push({ x: ptX, y: ptY, color: drawColor });
                     } else {
-                        // Hover / Stopped Mode: close current stroke and do not add ink
-                        if (currentStroke.length > 0) {
-                            drawPoints.push([...currentStroke]);
-                            currentStroke = [];
-                        }
-
+                        if (currentStroke.length > 0) { drawPoints.push([...currentStroke]); currentStroke = []; }
                         if (badge) {
                             if (!isMasterDrawingActive) {
                                 badge.className = "px-3 py-1.5 bg-red-950 border border-red-500/50 rounded-lg text-red-300 font-mono text-xs font-bold";
@@ -1290,13 +1186,49 @@
                             } else if (isTwoFingersHover) {
                                 badge.className = "px-3 py-1.5 bg-amber-950 border border-amber-500/50 rounded-lg text-amber-300 font-mono text-xs font-bold";
                                 badge.innerText = "Gesture: ✌️ HOVER (NO INK)";
-                            } else {
-                                badge.className = "px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 font-mono text-xs";
-                                badge.innerText = "Gesture: ✋ IDLE";
                             }
                         }
                     }
-                    document.getElementById('tel-log').innerText = isMasterDrawingActive && isIndexOnly ? "Ink Active (Drawing)" : "Pencil Lifted (Hover)";
+                }
+
+                // 10. P10 Presentation Control (Hand Left = Prev, Hand Right = Next)
+                if (projectId.includes('p10')) {
+                    const now = Date.now();
+                    const swipeCooldown = 1200; // ms
+
+                    // Draw Left & Right Interactive Sensor Zones on Canvas
+                    ctx.fillStyle = mirroredHandX < 0.28 ? 'rgba(6, 182, 212, 0.35)' : 'rgba(15, 23, 42, 0.15)';
+                    ctx.fillRect(0, 0, canvas.width * 0.28, canvas.height);
+
+                    ctx.fillStyle = mirroredHandX > 0.72 ? 'rgba(6, 182, 212, 0.35)' : 'rgba(15, 23, 42, 0.15)';
+                    ctx.fillRect(canvas.width * 0.72, 0, canvas.width * 0.28, canvas.height);
+
+                    // Zone Labels
+                    ctx.font = 'bold 12px JetBrains Mono, monospace';
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.fillText('⏮ PREV ZONE', 15, canvas.height / 2);
+                    ctx.fillText('NEXT ZONE ⏭', canvas.width - 110, canvas.height / 2);
+
+                    if (now - lastSlideSwipeTime > swipeCooldown) {
+                        if (mirroredHandX < 0.28) {
+                            lastSlideSwipeTime = now;
+                            prevSlide();
+                        } else if (mirroredHandX > 0.72) {
+                            lastSlideSwipeTime = now;
+                            nextSlide();
+                        }
+                    }
+                }
+
+                // 11. P11 Gesture Media Player (Open Palm = Play, Closed Fist = Stop/Pause)
+                if (projectId.includes('p11')) {
+                    if (count === 0) {
+                        // Closed Fist / Palm Closed -> Stop / Pause
+                        setMediaPlayerState(false);
+                    } else if (count >= 4) {
+                        // Open Palm (4 to 5 fingers extended) -> Play / Resume
+                        setMediaPlayerState(true);
+                    }
                 }
 
                 // 12. P12 Sign Language Recognition
@@ -1314,28 +1246,15 @@
                     document.getElementById('tel-log').innerText = `Sign Classified: ${sign}`;
                 }
 
-                // Draw Landmarks
+                // Landmark Points
                 [4, 8, 12, 16, 20].forEach(tip => {
                     const px = lms[tip].x * canvas.width;
                     const py = lms[tip].y * canvas.height;
                     ctx.beginPath();
                     ctx.arc(px, py, 6, 0, 2 * Math.PI);
-                    ctx.fillStyle = (projectId.includes('p01') && pinchDist <= 0.028 && (tip === 4 || tip === 8)) ? '#22c55e' : '#06b6d4';
+                    ctx.fillStyle = '#06b6d4';
                     ctx.fill();
                 });
-
-                if (projectId.includes('p01') || projectId.includes('p03')) {
-                    const pxThumb = thumbTip.x * canvas.width;
-                    const pyThumb = thumbTip.y * canvas.height;
-                    const pxIndex = indexTip.x * canvas.width;
-                    const pyIndex = indexTip.y * canvas.height;
-                    ctx.beginPath();
-                    ctx.moveTo(pxThumb, pyThumb);
-                    ctx.lineTo(pxIndex, pyIndex);
-                    ctx.strokeStyle = pinchDist <= 0.028 ? '#22c55e' : '#38bdf8';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
 
             } else {
                 cursor.style.display = 'none';
@@ -1344,23 +1263,14 @@
                 const badge = document.getElementById('finger-count-badge');
                 if (badge) badge.innerText = "0";
 
-                if (projectId.includes('p05') && !rpsLocked) {
-                    rpsHoldStart = null;
-                    const pBar = document.getElementById('rps-progress-bar');
-                    const tText = document.getElementById('rps-timer-text');
-                    if (pBar) pBar.style.width = '0%';
-                    if (tText) tText.innerText = '0.0s / 3.0s';
-                }
-
                 if (projectId.includes('p09') && currentStroke.length > 0) {
                     drawPoints.push([...currentStroke]);
                     currentStroke = [];
                 }
             }
 
-            // Render Virtual Drawing Canvas Strokes (P09)
+            // Render Drawing Strokes (P09)
             if (projectId.includes('p09')) {
-                // Completed strokes
                 drawPoints.forEach(stroke => {
                     if (stroke.length > 1) {
                         for (let i = 1; i < stroke.length; i++) {
@@ -1374,8 +1284,6 @@
                         }
                     }
                 });
-
-                // Active ongoing stroke
                 if (currentStroke.length > 1) {
                     for (let i = 1; i < currentStroke.length; i++) {
                         ctx.beginPath();
@@ -1402,22 +1310,12 @@
                 const faceMesh = new FaceMesh({
                     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
                 });
-
-                faceMesh.setOptions({
-                    maxNumFaces: 1,
-                    refineLandmarks: true,
-                    minDetectionConfidence: 0.5,
-                    minTrackingConfidence: 0.5
-                });
-
+                faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
                 faceMesh.onResults(onFaceResults);
 
                 const camera = new Camera(video, {
-                    onFrame: async () => {
-                        await faceMesh.send({ image: video });
-                    },
-                    width: 640,
-                    height: 480
+                    onFrame: async () => { await faceMesh.send({ image: video }); },
+                    width: 640, height: 480
                 });
                 camera.start();
 
@@ -1425,27 +1323,16 @@
                     const el = document.getElementById('profile-name');
                     if (el) el.innerText = registeredUserName;
                 }
-
             } else {
                 const hands = new Hands({
                     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
                 });
-
-                hands.setOptions({
-                    maxNumHands: 1,
-                    modelComplexity: 0,
-                    minDetectionConfidence: 0.5,
-                    minTrackingConfidence: 0.5
-                });
-
+                hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
                 hands.onResults(onHandResults);
 
                 const camera = new Camera(video, {
-                    onFrame: async () => {
-                        await hands.send({ image: video });
-                    },
-                    width: 640,
-                    height: 480
+                    onFrame: async () => { await hands.send({ image: video }); },
+                    width: 640, height: 480
                 });
                 camera.start();
             }
