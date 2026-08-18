@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} - AI &amp; IoT Hub</title>
+    <title>{{ project.title }} - Live Vision Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MediaPipe In-Browser Vision Models -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Inter', sans-serif; } </style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #webcam-canvas { transform: scaleX(-1); }
+        #webcam-video { display: none; }
+    </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -22,32 +29,27 @@
                 </div>
                 <p class="text-slate-400 text-sm md:text-base">{{ project.desc }}</p>
             </div>
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider w-fit">
+            <div id="connection-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider w-fit">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Node Connected</span>
+                <span id="badge-status">Ready for Live Demo</span>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
                 <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
-                    <img id="stream-img" 
-                         src="/video_feed/{{ project.id }}" 
-                         alt="Live Stream" 
-                         class="w-full h-full object-contain bg-slate-950"
-                         onerror="showCloudPlaceholder();">
+                    <video id="webcam-video" playsinline autoplay></video>
+                    <canvas id="webcam-canvas" class="w-full h-full object-cover"></canvas>
                     
-                    <div id="cloud-notice" class="hidden absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center text-center p-6 space-y-3">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-2xl text-blue-400">
-                            ⚡
-                        </div>
-                        <h4 class="text-white font-semibold text-lg">Cloud Execution Mode</h4>
-                        <p class="text-xs text-slate-400 max-w-md leading-relaxed">
-                            Webcam hardware streams &amp; local OS controls (mouse, audio, relays) run locally via edge host.
+                    <div id="start-screen" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-4 p-6 text-center z-10">
+                        <div class="text-5xl animate-bounce">{{ project.icon }}</div>
+                        <h3 class="text-xl font-bold text-white">Start Interactive Demo</h3>
+                        <p class="text-xs text-slate-400 max-w-sm">
+                            Click start to activate your device's camera and test real-time gesture tracking and telemetry live on this screen.
                         </p>
-                        <div class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-xs font-mono text-cyan-400">
-                            python app.py
-                        </div>
+                        <button onclick="startInteractiveCam()" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-all shadow-lg shadow-blue-600/30">
+                            Launch Live Camera Feed
+                        </button>
                     </div>
                 </div>
             </div>
@@ -55,20 +57,24 @@
             <div class="space-y-6">
                 <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
                     <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
-                        <span>⚡</span> Live Edge Telemetry
+                        <span>⚡</span> Real-Time AI Telemetry
                     </h3>
-                    <div id="telemetry-box" class="space-y-3 font-mono text-sm bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 text-emerald-400">
-                        <div>Pipeline: Initialized</div>
-                        <div>Status: Active</div>
+                    <div class="space-y-3 font-mono text-sm bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 text-emerald-400">
+                        <div>Vision Status: <span id="tel-status" class="text-cyan-400">Standby</span></div>
+                        <div>Landmarks: <span id="tel-pts" class="text-white">0 tracked</span></div>
+                        <div>Action Output: <span id="tel-action" class="text-yellow-400">None</span></div>
+                        <div>Virtual Output: <span id="tel-metric" class="text-emerald-300">Idle</span></div>
                     </div>
                 </div>
 
                 <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
                     <h3 class="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                        <span>💡</span> System Architecture
+                        <span>💡</span> How to Demonstrate
                     </h3>
                     <p class="text-xs text-slate-400 leading-relaxed">
-                        Features real-time computer vision inference with MediaPipe, automated event dispatch, and micro-controller serial synchronization.
+                        • <strong>P01 Mouse:</strong> Point index finger to generate cursor coordinate tracking.<br><br>
+                        • <strong>P02 Volume:</strong> Pinch index and thumb to dynamically calculate distance percentage on screen.<br><br>
+                        • <strong>P04 Counter:</strong> Hold up fingers to count and trigger virtual relays.
                     </p>
                 </div>
             </div>
@@ -76,21 +82,97 @@
     </div>
 
     <script>
-        function showCloudPlaceholder() {
-            document.getElementById('cloud-notice').classList.remove('hidden');
+        const videoElement = document.getElementById('webcam-video');
+        const canvasElement = document.getElementById('webcam-canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const startScreen = document.getElementById('start-screen');
+        const badgeStatus = document.getElementById('badge-status');
+
+        let hands;
+        let camera;
+
+        function onResults(results) {
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                document.getElementById('tel-status').innerText = 'Hand Detected';
+                document.getElementById('tel-pts').innerText = '21 Hand Points';
+
+                for (const landmarks of results.multiHandLandmarks) {
+                    // Draw connections & points
+                    for (let i = 0; i < landmarks.length; i++) {
+                        const x = landmarks[i].x * canvasElement.width;
+                        const y = landmarks[i].y * canvasElement.height;
+                        canvasCtx.beginPath();
+                        canvasCtx.arc(x, y, 4, 0, 2 * Math.PI);
+                        canvasCtx.fillStyle = '#06b6d4';
+                        canvasCtx.fill();
+                    }
+
+                    const indexTip = landmarks[8];
+                    const thumbTip = landmarks[4];
+                    const x1 = indexTip.x * canvasElement.width;
+                    const y1 = indexTip.y * canvasElement.height;
+                    const x2 = thumbTip.x * canvasElement.width;
+                    const y2 = thumbTip.y * canvasElement.height;
+                    const dist = Math.hypot(x1 - x2, y1 - y2);
+
+                    canvasCtx.beginPath();
+                    canvasCtx.moveTo(x1, y1);
+                    canvasCtx.lineTo(x2, y2);
+                    canvasCtx.strokeStyle = '#22c55e';
+                    canvasCtx.lineWidth = 3;
+                    canvasCtx.stroke();
+
+                    const pct = Math.min(100, Math.max(0, Math.round((dist - 30) / 1.5)));
+                    document.getElementById('tel-action').innerText = dist < 45 ? 'Pinch / Click Trigger' : 'Tracking Movement';
+                    document.getElementById('tel-metric').innerText = `Value: ${pct}% | Pos: (${Math.round(x1)}, ${Math.round(y1)})`;
+
+                    // On-screen metric bar
+                    canvasCtx.fillStyle = '#22c55e';
+                    canvasCtx.font = '20px sans-serif';
+                    canvasCtx.fillText(`Signal: ${pct}%`, 30, 50);
+                }
+            } else {
+                document.getElementById('tel-status').innerText = 'Searching Hand';
+                document.getElementById('tel-pts').innerText = '0 tracked';
+                document.getElementById('tel-action').innerText = 'Waiting for hand in view';
+            }
+            canvasCtx.restore();
         }
 
-        setInterval(() => {
-            fetch('/api/state/{{ project.id }}')
-                .then(res => res.json())
-                .then(data => {
-                    const box = document.getElementById('telemetry-box');
-                    box.innerHTML = Object.entries(data)
-                        .map(([k, v]) => `<div><span class="text-slate-500">${k}:</span> ${v}</div>`)
-                        .join('');
-                })
-                .catch(() => {});
-        }, 1000);
+        async function startInteractiveCam() {
+            startScreen.style.display = 'none';
+            badgeStatus.innerText = 'Vision Engine Active';
+
+            canvasElement.width = 640;
+            canvasElement.height = 480;
+
+            hands = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+
+            hands.setOptions({
+                maxNumHands: 2,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.6,
+                minTrackingConfidence: 0.6
+            });
+
+            hands.onResults(onResults);
+
+            camera = new Camera(videoElement, {
+                onFrame: async () => {
+                    await hands.send({ image: videoElement });
+                },
+                width: 640,
+                height: 480
+            });
+
+            camera.start();
+        }
     </script>
 </body>
 </html>
