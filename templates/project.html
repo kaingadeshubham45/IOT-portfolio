@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.title }} - AI &amp; IoT Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <a href="/" class="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-6 transition-colors">
+            &larr; Back to Dashboard
+        </a>
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-3xl">{{ project.icon }}</span>
+                    <h1 class="text-3xl font-bold text-white">{{ project.title }}</h1>
+                </div>
+                <p class="text-slate-400 text-sm md:text-base">{{ project.desc }}</p>
+            </div>
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider w-fit">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Node Connected
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-4">
+                <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
+                    <img src="/video_feed/{{ project.id }}" 
+                         alt="Live Vision Stream" 
+                         class="w-full h-full object-cover"
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center p-6 text-slate-500\'><div class=\'text-4xl mb-2\'>📷</div><p class=\'font-medium text-slate-400\'>Cloud Environment Active</p><p class=\'text-xs mt-1\'>Camera stream active on local hardware connection.</p></div>';">
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
+                    <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
+                        <span>⚡</span> Live Edge Telemetry
+                    </h3>
+                    <div id="telemetry-box" class="space-y-3 font-mono text-sm bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 text-emerald-400">
+                        <div>Status: Active</div>
+                        <div>Bridge: Connected</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
+                    <h3 class="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                        <span>🔧</span> System Execution
+                    </h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                        To run this module locally with direct webcam interaction and physical serial hardware triggers:
+                    </p>
+                    <code class="block bg-slate-950 p-3 rounded-lg text-xs text-blue-400 font-mono overflow-x-auto">
+                        python app.py
+                    </code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        setInterval(() => {
+            fetch('/api/state/{{ project.id }}')
+                .then(res => res.json())
+                .then(data => {
+                    const box = document.getElementById('telemetry-box');
+                    box.innerHTML = Object.entries(data)
+                        .map(([k, v]) => `<div><span class="text-slate-500">${k}:</span> ${v}</div>`)
+                        .join('');
+                })
+                .catch(() => {});
+        }, 1000);
+    </script>
+</body>
+</html>
