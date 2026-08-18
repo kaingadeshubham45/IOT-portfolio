@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} - Live Vision Control</title>
+    <title>{{ project.title }} - Live Vision AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
@@ -38,7 +38,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen relative select-none">
 
-    <!-- Glowing Index Tip Virtual Cursor -->
+    <!-- Virtual Cursor (Active only in Mouse Project) -->
     <div id="virtual-cursor"></div>
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
@@ -51,16 +51,16 @@
                 <span class="text-3xl">{{ project.icon }}</span>
                 <div>
                     <h1 class="text-2xl font-bold text-white">{{ project.title }}</h1>
-                    <p class="text-xs text-slate-400">Direct Gesture Control Active</p>
+                    <p class="text-xs text-slate-400">{{ project.desc }}</p>
                 </div>
             </div>
             <div class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-                ● Live Camera Control
+                ● Live Camera Active
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Camera Canvas View -->
+            <!-- Main Live Camera Viewport -->
             <div class="lg:col-span-2 space-y-4">
                 <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-xl">
                     <video id="cam-video" playsinline autoplay></video>
@@ -70,9 +70,10 @@
                     </div>
                 </div>
 
-                <!-- Interactive Target Buttons (For P01 Mouse) -->
+                <!-- P01 Mouse Specific: Interactive Target Triggers -->
+                {% if 'mouse' in project.id %}
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
-                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Interactive Action Targets (Hover 0.5s to trigger)</div>
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Interactive Action Targets (Hover index finger 0.5s to click)</div>
                     <div class="grid grid-cols-3 gap-3">
                         <button id="btn-target-1" onclick="handleTargetClick('Good Morning! Target 1 has been activated successfully.', 'Target 1: Good Morning! ☀️')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-cyan-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
                             ☀️ Say "Good Morning"
@@ -85,62 +86,78 @@
                         </button>
                     </div>
                 </div>
-            </div>
+                {% endif %}
 
-            <!-- Telemetry & Volume Control (For P02 Volume) -->
-            <div class="space-y-4">
-                <!-- Volume Player Demo Box -->
-                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+                <!-- P02 Volume Specific: Audio Visualizer Player -->
+                {% if 'volume' in project.id %}
+                <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-sm font-semibold text-white flex items-center gap-2">
-                            <span>🔊</span> Live Audio Volume
-                        </h3>
-                        <button id="audio-toggle-btn" onclick="toggleAudioDemo()" class="text-xs px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-white font-medium transition-all">
-                            Enable Test Music
+                        <div>
+                            <h4 class="text-sm font-semibold text-white">Audio Synthesis Output</h4>
+                            <p class="text-xs text-slate-400">Audio gain reacts directly to physical hand height.</p>
+                        </div>
+                        <button id="audio-toggle-btn" onclick="toggleAudioDemo()" class="text-xs px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-medium transition-all">
+                            Start Audio Test 🔊
                         </button>
                     </div>
-                    
-                    <div class="w-full bg-slate-950 h-6 rounded-full overflow-hidden border border-slate-800 p-0.5 mb-2">
-                        <div id="volume-meter" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full transition-all duration-75" style="width: 50%;"></div>
+                    <div class="w-full bg-slate-950 h-8 rounded-xl overflow-hidden border border-slate-800 p-1 mb-2">
+                        <div id="volume-meter-large" class="bg-gradient-to-r from-cyan-500 via-emerald-400 to-yellow-400 h-full rounded-lg transition-all duration-75" style="width: 50%;"></div>
                     </div>
                     <div class="flex justify-between text-xs text-slate-400 font-mono">
-                        <span>Min (0%)</span>
-                        <span id="volume-pct-label" class="text-emerald-400 font-bold">50%</span>
-                        <span>Max (100%)</span>
+                        <span>0% (Hand Low)</span>
+                        <span id="volume-pct-large" class="text-emerald-400 font-bold text-sm">50%</span>
+                        <span>100% (Hand High)</span>
                     </div>
-                    <p class="text-[11px] text-slate-500 mt-2">
-                        Move hand <strong>higher</strong> to turn volume UP, move hand <strong>lower</strong> to turn volume DOWN.
-                    </p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Telemetry & Instructions Sidebar -->
+            <div class="space-y-4">
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+                    <h3 class="text-sm font-semibold text-white mb-3">⚡ Real-Time Telemetry</h3>
+                    <div class="space-y-2.5 font-mono text-xs bg-slate-950/70 p-3.5 rounded-lg border border-slate-800 text-emerald-400">
+                        <div>Target Mode: <span class="text-cyan-400">{% if 'volume' in project.id %}Hand Elevation (Y-Axis){% else %}Index Fingertip Navigation{% endif %}</span></div>
+                        <div>Coordinates: <span id="tel-pos" class="text-white">--</span></div>
+                        <div>Status: <span id="tel-status" class="text-yellow-400">Scanning...</span></div>
+                        <div>Output Log: <span id="tel-log" class="text-emerald-300">Ready</span></div>
+                    </div>
                 </div>
 
-                <!-- Telemetry Log -->
                 <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
-                    <h3 class="text-sm font-semibold text-white mb-3">⚡ Live Output Telemetry</h3>
-                    <div class="space-y-2.5 font-mono text-xs bg-slate-950/70 p-3.5 rounded-lg border border-slate-800 text-emerald-400">
-                        <div>Tracking: <span class="text-cyan-400">Index Finger Tip</span></div>
-                        <div>Position: <span id="tel-pos" class="text-white">--</span></div>
-                        <div>Status: <span id="tel-status" class="text-yellow-400">Scanning...</span></div>
-                        <div>Action Log: <span id="tel-log" class="text-emerald-300">Ready</span></div>
-                    </div>
+                    <h3 class="text-sm font-semibold text-white mb-2">💡 Project Guide</h3>
+                    {% if 'volume' in project.id %}
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        • <strong>Raise Hand:</strong> Ramps audio volume up towards <strong>100%</strong>.<br><br>
+                        • <strong>Lower Hand:</strong> Dims audio volume down towards <strong>0%</strong> (Mute).<br><br>
+                        • Click <strong>Start Audio Test</strong> to hear dynamic speaker volume changes in real time.
+                    </p>
+                    {% else %}
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        • <strong>Move Index Finger:</strong> Steers the glowing pointer across the screen.<br><br>
+                        • <strong>Hover 0.5s:</strong> Triggers on-screen clicks and audio voice responses like <em>"Good Morning"</em>.
+                    </p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Interactive Popup Toast for Click Confirmation -->
+    <!-- Voice / Action Feedback Toast -->
     <div id="toast-modal" class="fixed bottom-6 right-6 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-2xl font-medium text-sm transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-2">
-        <span id="toast-icon">✨</span>
+        <span>✨</span>
         <span id="toast-text">Action Confirmed</span>
     </div>
 
     <script>
+        const isMouseProject = {{ 'true' if 'mouse' in project.id else 'false' }};
+        const isVolumeProject = {{ 'true' if 'volume' in project.id else 'false' }};
+
         const video = document.getElementById('cam-video');
         const canvas = document.getElementById('cam-canvas');
         const ctx = canvas.getContext('2d');
         const cursor = document.getElementById('virtual-cursor');
         const loading = document.getElementById('cam-loading');
-        const volMeter = document.getElementById('volume-meter');
-        const volLabel = document.getElementById('volume-pct-label');
         const toast = document.getElementById('toast-modal');
         const toastText = document.getElementById('toast-text');
 
@@ -149,26 +166,27 @@
         let hoverStart = null;
         let currentHovered = null;
 
-        // Web Audio Synthesizer & Audio Volume Engine
+        // Web Audio Synthesizer
         let audioCtx = null;
         let osc = null;
         let gainNode = null;
-        let audioRunning = false;
 
         function initAudioEngine() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 osc = audioCtx.createOscillator();
                 gainNode = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(360, audioCtx.currentTime);
                 gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
                 osc.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 osc.start();
-                audioRunning = true;
-                document.getElementById('audio-toggle-btn').innerText = 'Audio Active 🔊';
-                document.getElementById('audio-toggle-btn').classList.replace('bg-cyan-600', 'bg-emerald-600');
+                const btn = document.getElementById('audio-toggle-btn');
+                if (btn) {
+                    btn.innerText = 'Audio Playing 🔊';
+                    btn.classList.replace('bg-cyan-600', 'bg-emerald-600');
+                }
             }
         }
 
@@ -177,30 +195,25 @@
                 initAudioEngine();
             } else if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
-                document.getElementById('audio-toggle-btn').innerText = 'Audio Active 🔊';
+                const btn = document.getElementById('audio-toggle-btn');
+                if (btn) btn.innerText = 'Audio Playing 🔊';
             } else if (audioCtx.state === 'running') {
                 audioCtx.suspend();
-                document.getElementById('audio-toggle-btn').innerText = 'Audio Muted 🔇';
+                const btn = document.getElementById('audio-toggle-btn');
+                if (btn) btn.innerText = 'Audio Muted 🔇';
             }
         }
 
-        // Voice Speech & Popup Trigger
         function handleTargetClick(speechPhrase, displayMsg) {
             document.getElementById('tel-log').innerText = displayMsg;
-
-            // Toast feedback
             toastText.innerText = displayMsg;
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 2500);
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 2500);
 
-            // Text-to-Speech synthesis
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Cancel previous speech
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(speechPhrase);
                 utterance.rate = 1.0;
-                utterance.pitch = 1.1;
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -212,68 +225,70 @@
             ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                cursor.style.display = 'block';
-                document.getElementById('tel-status').innerText = 'Index Locked';
-
+                document.getElementById('tel-status').innerText = 'Hand Tracking Active';
                 const idx = results.multiHandLandmarks[0][8];
 
-                // Draw ONLY Index Fingertip
+                // Render index tracking marker
                 const px = idx.x * canvas.width;
                 const py = idx.y * canvas.height;
                 ctx.beginPath();
-                ctx.arc(px, py, 8, 0, 2 * Math.PI);
-                ctx.fillStyle = '#06b6d4';
+                ctx.arc(px, py, 9, 0, 2 * Math.PI);
+                ctx.fillStyle = isVolumeProject ? '#10b981' : '#06b6d4';
                 ctx.fill();
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = '#38bdf8';
+                ctx.strokeStyle = '#ffffff';
                 ctx.stroke();
 
-                // Screen Mapping
-                const targetX = (1.0 - idx.x) * window.innerWidth;
-                const targetY = idx.y * window.innerHeight;
-                lastX += (targetX - lastX) * 0.6;
-                lastY += (targetY - lastY) * 0.6;
+                // 1. P01 Virtual Mouse Mode
+                if (isMouseProject) {
+                    cursor.style.display = 'block';
+                    const targetX = (1.0 - idx.x) * window.innerWidth;
+                    const targetY = idx.y * window.innerHeight;
+                    lastX += (targetX - lastX) * 0.6;
+                    lastY += (targetY - lastY) * 0.6;
 
-                cursor.style.left = lastX + 'px';
-                cursor.style.top = lastY + 'px';
-                document.getElementById('tel-pos').innerText = Math.round(lastX) + ', ' + Math.round(lastY);
+                    cursor.style.left = lastX + 'px';
+                    cursor.style.top = lastY + 'px';
+                    document.getElementById('tel-pos').innerText = `${Math.round(lastX)}, ${Math.round(lastY)}`;
 
-                // Direct Dynamic Volume Control (Hand Height: Up = 100%, Down = 0%)
-                const volPct = Math.min(100, Math.max(0, Math.round((1.0 - idx.y) * 100)));
-                volMeter.style.width = volPct + '%';
-                volLabel.innerText = volPct + '%';
+                    const elem = document.elementFromPoint(lastX, lastY);
+                    const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
 
-                // Adjust audio gain in real time
-                if (gainNode && audioCtx && audioCtx.state === 'running') {
-                    const gainVal = volPct / 100;
-                    gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                    if (clickable) {
+                        if (currentHovered !== clickable) {
+                            currentHovered = clickable;
+                            hoverStart = Date.now();
+                        } else if (Date.now() - hoverStart >= 500) {
+                            cursor.classList.add('clicking');
+                            clickable.click();
+                            setTimeout(() => cursor.classList.remove('clicking'), 250);
+                            hoverStart = Date.now() + 1200;
+                        }
+                    } else {
+                        currentHovered = null;
+                        hoverStart = null;
+                    }
                 }
 
-                // Dwell Hover Click (0.5s)
-                const elem = document.elementFromPoint(lastX, lastY);
-                const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
+                // 2. P02 Virtual Volume Mode (Independent Hand Height Tracker)
+                if (isVolumeProject) {
+                    cursor.style.display = 'none';
+                    const volPct = Math.min(100, Math.max(0, Math.round((1.0 - idx.y) * 100)));
+                    
+                    const meter = document.getElementById('volume-meter-large');
+                    const label = document.getElementById('volume-pct-large');
+                    if (meter) meter.style.width = volPct + '%';
+                    if (label) label.innerText = volPct + '%';
+                    document.getElementById('tel-pos').innerText = `Height Level: ${volPct}%`;
 
-                if (clickable) {
-                    if (currentHovered !== clickable) {
-                        currentHovered = clickable;
-                        hoverStart = Date.now();
-                    } else if (Date.now() - hoverStart >= 500) {
-                        cursor.classList.add('clicking');
-                        clickable.click();
-                        clickable.classList.add('ring-4', 'ring-cyan-400');
-                        setTimeout(() => {
-                            cursor.classList.remove('clicking');
-                            clickable.classList.remove('ring-4', 'ring-cyan-400');
-                        }, 300);
-                        hoverStart = Date.now() + 1200; // Debounce
+                    if (gainNode && audioCtx && audioCtx.state === 'running') {
+                        gainNode.gain.setValueAtTime(volPct / 100, audioCtx.currentTime);
                     }
-                } else {
-                    currentHovered = null;
-                    hoverStart = null;
+                    document.getElementById('tel-log').innerText = `Volume Output: ${volPct}%`;
                 }
             } else {
                 cursor.style.display = 'none';
-                document.getElementById('tel-status').innerText = 'Scanning for Finger';
+                document.getElementById('tel-status').innerText = 'Searching for Hand';
             }
             ctx.restore();
         }
