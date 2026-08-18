@@ -1,10 +1,8 @@
 ﻿import os
-import sys
 from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
-# Complete catalog of all 12 projects with full metadata
 PROJECTS = {
     'p01_virtual_mouse': {
         'id': 'p01_virtual_mouse',
@@ -21,7 +19,7 @@ PROJECTS = {
     'p03_virtual_keyboard': {
         'id': 'p03_virtual_keyboard',
         'title': 'Virtual Keyboard Automation',
-        'desc': 'Touchless interactive on-screen key typing with distance tap detection.',
+        'desc': 'Touchless interactive on-screen key typing with dual-hand tracking.',
         'icon': '⌨️'
     },
     'p04_finger_counter': {
@@ -88,7 +86,6 @@ def index():
 def view_project(project_id):
     proj = PROJECTS.get(project_id)
     if not proj:
-        # Match shorthand keys if accessed like 'p01'
         for k, v in PROJECTS.items():
             if k.startswith(project_id) or project_id.startswith(k):
                 proj = v
