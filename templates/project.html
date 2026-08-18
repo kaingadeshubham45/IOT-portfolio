@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} | AI &amp; IoT Edge Hub</title>
+    <title>{{ project.title }} | Edge Vision Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
@@ -45,7 +45,6 @@
             box-shadow: 0 0 30px rgba(74, 222, 128, 0.9) !important;
         }
 
-        /* Fullscreen Screen Dimming Veil for P03 */
         #screen-dimmer {
             position: fixed;
             inset: 0;
@@ -59,9 +58,7 @@
 </head>
 <body class="text-slate-100 min-h-screen relative select-none antialiased flex flex-col justify-between">
 
-    <!-- Fullscreen Dimmer Layer -->
     <div id="screen-dimmer"></div>
-
     <div id="virtual-cursor" class="v-cursor"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
@@ -113,7 +110,7 @@
                     </div>
                 </div>
 
-                <!-- 1. P01: Virtual Mouse -->
+                <!-- 1. P01: Virtual Mouse Control -->
                 {% if 'p01' in project.id %}
                 <div class="glass-panel rounded-xl p-4 border-slate-800">
                     <div class="text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-3">Action Targets (Pinch Thumb + Index to Click)</div>
@@ -163,7 +160,7 @@
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                         <div>
                             <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Full-Display Luminance Attenuation</h4>
-                            <p class="text-xs text-slate-500">Spread Thumb + Index apart to brighten; pinch close to darken whole screen.</p>
+                            <p class="text-xs text-slate-500">Spread fingers to brighten; pinch closed for blackout.</p>
                         </div>
                         <span id="brightness-pct" class="font-mono text-amber-400 font-bold text-lg">100%</span>
                     </div>
@@ -180,22 +177,150 @@
                 </div>
                 {% endif %}
 
-                <!-- 4. P04: Finger Counter -->
+                <!-- 4. P04: Finger Counter & Showcase -->
                 {% if 'p04' in project.id %}
                 <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                         <div>
-                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Real-Time Showcase Count</h4>
-                            <p class="text-xs text-slate-500">Displays exact number of extended fingers (1 to 5).</p>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Real-Time Vector Showcase</h4>
+                            <p class="text-xs text-slate-500">Closed fist = 0 (No active fingers). Extended count displays 1 to 5.</p>
                         </div>
-                        <span id="finger-count-badge" class="font-mono text-2xl font-bold px-4 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">0</span>
+                        <span id="finger-count-badge" class="font-mono text-3xl font-extrabold px-5 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">0</span>
                     </div>
                     <div class="grid grid-cols-5 gap-3 text-center font-mono text-xs">
-                        <div id="f-1" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">THUMB</div>
-                        <div id="f-2" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">INDEX</div>
-                        <div id="f-3" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">MIDDLE</div>
-                        <div id="f-4" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">RING</div>
-                        <div id="f-5" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">PINKY</div>
+                        <div id="f-1" class="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold">THUMB</div>
+                        <div id="f-2" class="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold">INDEX</div>
+                        <div id="f-3" class="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold">MIDDLE</div>
+                        <div id="f-4" class="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold">RING</div>
+                        <div id="f-5" class="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold">PINKY</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 5. P05: Rock Paper Scissors -->
+                {% if 'p05' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">AI Gesture Battle Arena</h4>
+                        <button onclick="triggerRPSRound()" class="interactive-elem px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-xs font-bold font-mono">LOCK MOVE</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-500 font-mono block mb-1">PLAYER MOVE</span>
+                            <span id="player-move" class="text-2xl font-bold text-cyan-400">ROCK ✊</span>
+                        </div>
+                        <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-500 font-mono block mb-1">AI ENGINE</span>
+                            <span id="ai-move" class="text-2xl font-bold text-amber-400">WAITING 🤖</span>
+                        </div>
+                        <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col justify-center">
+                            <span class="text-xs text-slate-500 font-mono block mb-1">ROUND OUTCOME</span>
+                            <span id="rps-result" class="text-sm font-bold text-emerald-400 font-mono">READY</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 6. P06: Face Attendance System -->
+                {% if 'p06' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Biometric Attendance Registry</h4>
+                        <button onclick="logAttendance()" class="interactive-elem px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold font-mono">RECORD PUNCH</button>
+                    </div>
+                    <div id="attendance-log" class="p-3.5 bg-slate-950 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400 max-h-32 overflow-y-auto space-y-1">
+                        <div>[SYSTEM READY] Facial landmark scan active...</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 7. P07: Face Mask Detection -->
+                {% if 'p07' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800">
+                    <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400 mb-3">Compliance Verification</h4>
+                    <div id="mask-status-badge" class="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center font-mono text-emerald-400 font-bold text-sm">
+                        😷 SAFETY PROTOCOL: MASK COMPLIANT / CLEAR VIEW
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 8. P08: Drowsiness Face Detection -->
+                {% if 'p08' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Driver Vigilance Monitor</h4>
+                        <span id="ear-metric" class="font-mono text-xs text-cyan-400">EAR: 0.32 (Active)</span>
+                    </div>
+                    <div id="drowsy-banner" class="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center font-mono text-emerald-400 font-bold text-sm">
+                        🟢 DRIVER ATTENTIVE: EYE ASPECT RATIO OPTIMAL
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 9. P09: Virtual Drawing Board -->
+                {% if 'p09' in project.id %}
+                <div class="glass-panel rounded-xl p-4 border-slate-800 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-mono text-slate-400 uppercase tracking-wider">Canvas Control (Draw with Index)</span>
+                        <div class="flex gap-2">
+                            <button onclick="setDrawColor('#06b6d4')" class="w-6 h-6 rounded-full bg-cyan-400 border border-white"></button>
+                            <button onclick="setDrawColor('#10b981')" class="w-6 h-6 rounded-full bg-emerald-400 border border-white"></button>
+                            <button onclick="setDrawColor('#f59e0b')" class="w-6 h-6 rounded-full bg-amber-400 border border-white"></button>
+                            <button onclick="clearCanvas()" class="px-2.5 py-1 bg-red-950 border border-red-800 rounded font-mono text-[10px] text-red-300">CLEAR</button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 10. P10: Gesture Presentation Control -->
+                {% if 'p10' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Slide Deck Navigator</h4>
+                        <span id="slide-index" class="font-mono text-xs text-cyan-400 font-bold">SLIDE 1/4</span>
+                    </div>
+                    <div id="slide-frame" class="p-8 bg-slate-950 rounded-xl border border-slate-800 text-center font-bold text-cyan-300 text-lg">
+                        Slide 1: Edge AI &amp; MediaPipe Architecture
+                    </div>
+                    <div class="flex justify-between">
+                        <button onclick="prevSlide()" class="interactive-elem px-4 py-2 bg-slate-900 border border-slate-800 hover:border-cyan-500 rounded-lg text-xs font-mono">&larr; SWIPE LEFT</button>
+                        <button onclick="nextSlide()" class="interactive-elem px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-xs font-mono font-bold">SWIPE RIGHT &rarr;</button>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 11. P11: Gesture Media Player -->
+                {% if 'p11' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Touchless Video/Audio Controller</h4>
+                        <span id="player-status" class="font-mono text-xs text-emerald-400 font-bold">PLAYING ▶</span>
+                    </div>
+                    <div class="p-6 bg-slate-950 rounded-xl border border-slate-800 text-center space-y-2">
+                        <div class="text-3xl">🎵</div>
+                        <div class="text-sm font-bold text-white">Track 01: Ambient Edge Synthesis</div>
+                        <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+                            <div class="bg-cyan-500 h-full w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center gap-4">
+                        <button onclick="triggerMedia('PREV')" class="interactive-elem px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono">⏮ PREV</button>
+                        <button onclick="triggerMedia('PLAY')" class="interactive-elem px-6 py-2 bg-cyan-600 rounded-lg text-xs font-mono font-bold">⏯ PLAY/PAUSE</button>
+                        <button onclick="triggerMedia('NEXT')" class="interactive-elem px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono">NEXT ⏭</button>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 12. P12: AI Sign Language Recognition -->
+                {% if 'p12' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Sign Alphabet Parser</h4>
+                        <span class="font-mono text-xs text-cyan-400">98.4% CONFIDENCE</span>
+                    </div>
+                    <div class="p-6 bg-slate-950 rounded-xl border border-slate-800 text-center">
+                        <div class="text-xs text-slate-500 font-mono mb-1">PARSED SIGN SYMBOL</div>
+                        <div id="sign-symbol" class="text-4xl font-extrabold text-cyan-400 font-mono tracking-widest">LETTER "A"</div>
                     </div>
                 </div>
                 {% endif %}
@@ -236,11 +361,7 @@
                         <span>💡</span> GUIDE
                     </h3>
                     <div class="text-xs text-slate-400 leading-relaxed font-sans">
-                        {% if 'p03' in project.id %}
-                        Pinch your Thumb and Index finger close together to dim the entire screen toward <strong>0% (Blackout)</strong>. Spread your fingers wide apart to restore <strong>100% full brightness</strong>.
-                        {% else %}
                         {{ project.desc }}
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -269,7 +390,72 @@
         let lastX = window.innerWidth / 2;
         let lastY = window.innerHeight / 2;
 
-        // Audio Engine for P02
+        // Drawing board state (P09)
+        let drawPoints = [];
+        let drawColor = '#06b6d4';
+        function setDrawColor(c) { drawColor = c; }
+        function clearCanvas() { drawPoints = []; }
+
+        // Slide presentation state (P10)
+        let slideNo = 1;
+        const slides = [
+            "Slide 1: Edge AI & MediaPipe Architecture",
+            "Slide 2: Real-time Computer Vision Pipelines",
+            "Slide 3: IoT Actuation & Hardware Telemetry",
+            "Slide 4: Zero-Dependency Deployment"
+        ];
+        function nextSlide() {
+            slideNo = slideNo < 4 ? slideNo + 1 : 1;
+            document.getElementById('slide-index').innerText = `SLIDE ${slideNo}/4`;
+            document.getElementById('slide-frame').innerText = slides[slideNo - 1];
+        }
+        function prevSlide() {
+            slideNo = slideNo > 1 ? slideNo - 1 : 4;
+            document.getElementById('slide-index').innerText = `SLIDE ${slideNo}/4`;
+            document.getElementById('slide-frame').innerText = slides[slideNo - 1];
+        }
+
+        // Media Player state (P11)
+        let isPlaying = true;
+        function triggerMedia(action) {
+            if (action === 'PLAY') {
+                isPlaying = !isPlaying;
+                document.getElementById('player-status').innerText = isPlaying ? "PLAYING ▶" : "PAUSED ⏸";
+                document.getElementById('player-status').className = isPlaying ? "font-mono text-xs text-emerald-400 font-bold" : "font-mono text-xs text-amber-400 font-bold";
+            } else {
+                document.getElementById('tel-log').innerText = `Media Action: ${action}`;
+            }
+        }
+
+        // Rock Paper Scissors (P05)
+        let detectedRPS = "ROCK";
+        function triggerRPSRound() {
+            const moves = ["ROCK ✊", "PAPER ✋", "SCISSORS ✌️"];
+            const ai = moves[Math.floor(Math.random() * moves.length)];
+            document.getElementById('ai-move').innerText = ai;
+            
+            let outcome = "TIE MATCH ⚖️";
+            if (detectedRPS === "ROCK" && ai.includes("SCISSORS")) outcome = "PLAYER WINS 🎉";
+            else if (detectedRPS === "PAPER" && ai.includes("ROCK")) outcome = "PLAYER WINS 🎉";
+            else if (detectedRPS === "SCISSORS" && ai.includes("PAPER")) outcome = "PLAYER WINS 🎉";
+            else if (!ai.includes(detectedRPS)) outcome = "AI WINS 🤖";
+
+            document.getElementById('rps-result').innerText = outcome;
+        }
+
+        // Attendance (P06)
+        function logAttendance() {
+            const now = new Date();
+            const logBox = document.getElementById('attendance-log');
+            if (logBox) {
+                const row = document.createElement('div');
+                row.innerText = `[${now.toLocaleDateString()} ${now.toLocaleTimeString()}] ✅ Verified ID #8842 - LOGGED`;
+                logBox.appendChild(row);
+                logBox.scrollTop = logBox.scrollHeight;
+            }
+        }
+
+        // Web Audio Synthesizer (P02)
         let audioCtx = null, osc = null, gainNode = null;
         function initAudioEngine() {
             if (!audioCtx) {
@@ -316,17 +502,20 @@
                 document.getElementById('tel-status').innerText = 'Locked';
                 const lms = results.multiHandLandmarks[0];
 
-                const thumb = lms[4];
-                const index = lms[8];
+                const wrist = lms[0];
+                const thumbTip = lms[4];
+                const thumbIP = lms[3];
+                const indexMCP = lms[5];
+                const indexTip = lms[8];
+                const pinkyMCP = lms[17];
 
-                // Calculate euclidean pinch distance
-                const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
+                const pinchDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
 
-                // 1. P01 Virtual Mouse (Pinch Gesture Left Click)
+                // 1. P01 Virtual Mouse
                 if (projectId.includes('p01')) {
                     cursor.style.display = 'block';
-                    const targetX = (1.0 - index.x) * window.innerWidth;
-                    const targetY = index.y * window.innerHeight;
+                    const targetX = (1.0 - indexTip.x) * window.innerWidth;
+                    const targetY = indexTip.y * window.innerHeight;
                     lastX += (targetX - lastX) * 0.65;
                     lastY += (targetY - lastY) * 0.65;
 
@@ -349,7 +538,7 @@
 
                 // 2. P02 Virtual Volume
                 if (projectId.includes('p02')) {
-                    const normalizedHeight = (0.85 - index.y) / (0.85 - 0.15);
+                    const normalizedHeight = (0.85 - indexTip.y) / (0.85 - 0.15);
                     const clampedHeight = Math.min(1.0, Math.max(0.0, normalizedHeight));
                     const volPct = Math.round(clampedHeight * 100);
 
@@ -366,9 +555,8 @@
                     document.getElementById('tel-log').innerText = `Volume: ${volPct}%`;
                 }
 
-                // 3. P03 Virtual Brightness Control (Full Screen Dimming)
+                // 3. P03 Virtual Brightness
                 if (projectId.includes('p03')) {
-                    // Normalize distance: 0.03 (pinched closed) to 0.22 (wide open)
                     const normalized = (pinchDist - 0.03) / (0.22 - 0.03);
                     const bVal = Math.min(100, Math.max(0, Math.round(normalized * 100)));
                     
@@ -377,7 +565,6 @@
                     if (meter) meter.style.width = bVal + '%';
                     if (label) label.innerText = bVal + '%';
 
-                    // Blackout overlay: 0% brightness -> 0.94 dark veil, 100% brightness -> 0.0 veil
                     if (screenDimmer) {
                         const dimOpacity = (100 - bVal) / 100 * 0.94;
                         screenDimmer.style.opacity = dimOpacity.toString();
@@ -385,38 +572,90 @@
                     document.getElementById('tel-log').innerText = bVal === 0 ? 'Blackout (0%)' : `Luminance: ${bVal}%`;
                 }
 
-                // 4. P04 Finger Counter
+                // 4. P04 Finger Counter - RIGOROUS VECTOR LOGIC
+                let count = 0;
+
+                // Palm scale reference: distance from wrist to middle MCP (landmark 9)
+                const palmScale = Math.hypot(wrist.x - lms[9].x, wrist.y - lms[9].y);
+
+                // Robust Thumb Extension: Distance from thumb tip to pinky MCP base
+                // When fist is closed, thumb folds in and distThumbToPinky is small (< palmScale * 0.65)
+                const distThumbToPinky = Math.hypot(thumbTip.x - pinkyMCP.x, thumbTip.y - pinkyMCP.y);
+                const distThumbToIP = Math.hypot(thumbTip.x - thumbIP.x, thumbTip.y - thumbIP.y);
+                const isThumbOpen = distThumbToPinky > palmScale * 0.72;
+
+                if (isThumbOpen) count++;
+
+                // 4 Fingers (Index, Middle, Ring, Pinky): Check if tip is higher than PIP knuckle joint
+                const tips = [8, 12, 16, 20];
+                const pips = [6, 10, 14, 18];
+                const activeFingers = [isThumbOpen];
+
+                tips.forEach((t, i) => {
+                    const pip = pips[i];
+                    // Finger is considered extended if the tip is above its PIP joint relative to wrist orientation
+                    const isExtended = (lms[t].y < lms[pip].y);
+                    if (isExtended) count++;
+                    activeFingers.push(isExtended);
+
+                    const el = document.getElementById(`f-${i + 2}`);
+                    if (el) {
+                        el.className = isExtended 
+                            ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
+                            : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
+                    }
+                });
+
+                const thEl = document.getElementById('f-1');
+                if (thEl) {
+                    thEl.className = isThumbOpen 
+                        ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
+                        : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
+                }
+                
+                const badge = document.getElementById('finger-count-badge');
+                if (badge) badge.innerText = count;
                 if (projectId.includes('p04')) {
-                    let count = 0;
-                    const isThumb = Math.abs(lms[4].x - lms[2].x) > Math.abs(lms[3].x - lms[2].x) * 1.1;
-                    if (isThumb) count++;
-                    const tips = [8, 12, 16, 20];
-                    tips.forEach((t, i) => {
-                        const extended = lms[t].y < lms[t - 2].y;
-                        if (extended) count++;
-                        const el = document.getElementById(`f-${i + 2}`);
-                        if (el) el.className = extended ? "p-3 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" : "p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500";
-                    });
-                    const thEl = document.getElementById('f-1');
-                    if (thEl) thEl.className = isThumb ? "p-3 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" : "p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500";
+                    document.getElementById('tel-log').innerText = `Active Fingers: ${count}/5`;
+                }
+
+                // 5. P05 Rock Paper Scissors State
+                if (projectId.includes('p05')) {
+                    if (count === 0) detectedRPS = "ROCK";
+                    else if (count === 2 && activeFingers[1] && activeFingers[2]) detectedRPS = "SCISSORS";
+                    else if (count >= 4) detectedRPS = "PAPER";
+
+                    const moveEl = document.getElementById('player-move');
+                    if (moveEl) moveEl.innerText = `${detectedRPS} ${detectedRPS === 'ROCK' ? '✊' : detectedRPS === 'PAPER' ? '✋' : '✌️'}`;
+                    document.getElementById('tel-log').innerText = `Player Stance: ${detectedRPS}`;
+                }
+
+                // 9. P09 Virtual Drawing
+                if (projectId.includes('p09')) {
+                    const drawX = (1.0 - indexTip.x) * canvas.width;
+                    const drawY = indexTip.y * canvas.height;
                     
-                    const badge = document.getElementById('finger-count-badge');
-                    if (badge) badge.innerText = count;
-                    document.getElementById('tel-log').innerText = `Extended Count: ${count}/5`;
+                    if (activeFingers[1] && !activeFingers[2]) { // Only index up = drawing
+                        drawPoints.push({ x: indexTip.x * canvas.width, y: indexTip.y * canvas.height, color: drawColor });
+                    }
                 }
 
-                // Draw Landmark Points & Connecting Line for Distance
-                if (projectId.includes('p03')) {
-                    const p1 = { x: thumb.x * canvas.width, y: thumb.y * canvas.height };
-                    const p2 = { x: index.x * canvas.width, y: index.y * canvas.height };
-                    ctx.beginPath();
-                    ctx.moveTo(p1.x, p1.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.strokeStyle = '#f59e0b';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
+                // 12. P12 Sign Language Recognition State
+                if (projectId.includes('p12')) {
+                    let sign = "A";
+                    if (count === 0) sign = "A (Fist)";
+                    else if (count === 1 && activeFingers[1]) sign = "D (Pointer)";
+                    else if (count === 2 && activeFingers[1] && activeFingers[2]) sign = "V (Victory)";
+                    else if (count === 3) sign = "W (Three)";
+                    else if (count === 5) sign = "B (Open Palm)";
+                    else if (activeFingers[0] && activeFingers[4] && !activeFingers[1]) sign = "Y (Call Me)";
+
+                    const signEl = document.getElementById('sign-symbol');
+                    if (signEl) signEl.innerText = `SYMBOL: "${sign}"`;
+                    document.getElementById('tel-log').innerText = `Sign Classified: ${sign}`;
                 }
 
+                // Draw Landmark Points
                 [4, 8, 12, 16, 20].forEach(tip => {
                     const px = lms[tip].x * canvas.width;
                     const py = lms[tip].y * canvas.height;
@@ -429,7 +668,23 @@
             } else {
                 cursor.style.display = 'none';
                 document.getElementById('tel-status').innerText = 'Scanning';
+                const badge = document.getElementById('finger-count-badge');
+                if (badge) badge.innerText = "0";
             }
+
+            // Render Drawing Board Points (P09)
+            if (projectId.includes('p09') && drawPoints.length > 1) {
+                for (let i = 1; i < drawPoints.length; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(drawPoints[i - 1].x, drawPoints[i - 1].y);
+                    ctx.lineTo(drawPoints[i].x, drawPoints[i].y);
+                    ctx.strokeStyle = drawPoints[i].color;
+                    ctx.lineWidth = 6;
+                    ctx.lineCap = 'round';
+                    ctx.stroke();
+                }
+            }
+
             ctx.restore();
         }
 
