@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} - Direct Vision</title>
+    <title>{{ project.title }} - Live Vision Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
@@ -12,6 +12,7 @@
         body { font-family: 'Inter', sans-serif; }
         #cam-video { display: none; }
         #cam-canvas { transform: scaleX(-1); }
+        
         #virtual-cursor {
             position: fixed;
             width: 22px;
@@ -31,11 +32,13 @@
             height: 32px;
             background: rgba(34, 197, 94, 0.9);
             border-color: #4ade80;
+            box-shadow: 0 0 25px #22c55e;
         }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen relative select-none">
 
+    <!-- Glowing Index Tip Virtual Cursor -->
     <div id="virtual-cursor"></div>
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
@@ -48,59 +51,86 @@
                 <span class="text-3xl">{{ project.icon }}</span>
                 <div>
                     <h1 class="text-2xl font-bold text-white">{{ project.title }}</h1>
-                    <p class="text-xs text-slate-400">Direct Index Tracking Active</p>
+                    <p class="text-xs text-slate-400">Direct Gesture Control Active</p>
                 </div>
             </div>
             <div class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-                ● Camera Live
+                ● Live Camera Control
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Camera Canvas View -->
             <div class="lg:col-span-2 space-y-4">
                 <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-xl">
                     <video id="cam-video" playsinline autoplay></video>
                     <canvas id="cam-canvas" class="w-full h-full object-cover"></canvas>
                     <div id="cam-loading" class="absolute inset-0 bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
-                        Starting Camera...
+                        Initializing Camera Stream...
                     </div>
                 </div>
 
+                <!-- Interactive Target Buttons (For P01 Mouse) -->
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
-                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Hover Targets (0.5s Auto Click)</div>
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Interactive Action Targets (Hover 0.5s to trigger)</div>
                     <div class="grid grid-cols-3 gap-3">
-                        <button onclick="logAction('Target Alpha Triggered')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-cyan-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
-                            Target A
+                        <button id="btn-target-1" onclick="handleTargetClick('Good Morning! Target 1 has been activated successfully.', 'Target 1: Good Morning! ☀️')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-cyan-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
+                            ☀️ Say "Good Morning"
                         </button>
-                        <button onclick="logAction('Target Beta Triggered')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-emerald-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
-                            Target B
+                        <button id="btn-target-2" onclick="handleTargetClick('IoT Relay Channel 1 Toggled ON.', 'Target 2: Relay Toggled ⚡')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-emerald-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
+                            ⚡ Trigger IoT Relay
                         </button>
-                        <button onclick="logAction('Target Gamma Triggered')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-purple-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
-                            Target C
+                        <button id="btn-target-3" onclick="handleTargetClick('Snapshot Captured and Saved to Storage.', 'Target 3: Snapshot Saved 📸')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-purple-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
+                            📸 Capture Snapshot
                         </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Telemetry & Volume Control (For P02 Volume) -->
             <div class="space-y-4">
+                <!-- Volume Player Demo Box -->
                 <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
-                    <h3 class="text-sm font-semibold text-white mb-3">⚡ Live Telemetry</h3>
-                    <div class="space-y-2.5 font-mono text-xs bg-slate-950/70 p-3.5 rounded-lg border border-slate-800 text-emerald-400">
-                        <div>Point: <span class="text-cyan-400">Index Tip (Landmark 8)</span></div>
-                        <div>Coords: <span id="tel-pos" class="text-white">--</span></div>
-                        <div>Status: <span id="tel-status" class="text-yellow-400">Scanning</span></div>
-                        <div>Log: <span id="tel-log" class="text-emerald-300">Ready</span></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                            <span>🔊</span> Live Audio Volume
+                        </h3>
+                        <button id="audio-toggle-btn" onclick="toggleAudioDemo()" class="text-xs px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 rounded text-white font-medium transition-all">
+                            Enable Test Music
+                        </button>
                     </div>
+                    
+                    <div class="w-full bg-slate-950 h-6 rounded-full overflow-hidden border border-slate-800 p-0.5 mb-2">
+                        <div id="volume-meter" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full transition-all duration-75" style="width: 50%;"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400 font-mono">
+                        <span>Min (0%)</span>
+                        <span id="volume-pct-label" class="text-emerald-400 font-bold">50%</span>
+                        <span>Max (100%)</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-2">
+                        Move hand <strong>higher</strong> to turn volume UP, move hand <strong>lower</strong> to turn volume DOWN.
+                    </p>
                 </div>
 
+                <!-- Telemetry Log -->
                 <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
-                    <h3 class="text-sm font-semibold text-white mb-2">🔊 Direct Signal Meter</h3>
-                    <div class="w-full bg-slate-950 h-6 rounded-full overflow-hidden border border-slate-800 p-0.5">
-                        <div id="volume-meter" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full transition-all duration-75" style="width: 50%;"></div>
+                    <h3 class="text-sm font-semibold text-white mb-3">⚡ Live Output Telemetry</h3>
+                    <div class="space-y-2.5 font-mono text-xs bg-slate-950/70 p-3.5 rounded-lg border border-slate-800 text-emerald-400">
+                        <div>Tracking: <span class="text-cyan-400">Index Finger Tip</span></div>
+                        <div>Position: <span id="tel-pos" class="text-white">--</span></div>
+                        <div>Status: <span id="tel-status" class="text-yellow-400">Scanning...</span></div>
+                        <div>Action Log: <span id="tel-log" class="text-emerald-300">Ready</span></div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Interactive Popup Toast for Click Confirmation -->
+    <div id="toast-modal" class="fixed bottom-6 right-6 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-2xl font-medium text-sm transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <span id="toast-icon">✨</span>
+        <span id="toast-text">Action Confirmed</span>
     </div>
 
     <script>
@@ -110,14 +140,69 @@
         const cursor = document.getElementById('virtual-cursor');
         const loading = document.getElementById('cam-loading');
         const volMeter = document.getElementById('volume-meter');
+        const volLabel = document.getElementById('volume-pct-label');
+        const toast = document.getElementById('toast-modal');
+        const toastText = document.getElementById('toast-text');
 
         let lastX = window.innerWidth / 2;
         let lastY = window.innerHeight / 2;
         let hoverStart = null;
         let currentHovered = null;
 
-        function logAction(msg) {
-            document.getElementById('tel-log').innerText = msg;
+        // Web Audio Synthesizer & Audio Volume Engine
+        let audioCtx = null;
+        let osc = null;
+        let gainNode = null;
+        let audioRunning = false;
+
+        function initAudioEngine() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                osc = audioCtx.createOscillator();
+                gainNode = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                audioRunning = true;
+                document.getElementById('audio-toggle-btn').innerText = 'Audio Active 🔊';
+                document.getElementById('audio-toggle-btn').classList.replace('bg-cyan-600', 'bg-emerald-600');
+            }
+        }
+
+        function toggleAudioDemo() {
+            if (!audioCtx) {
+                initAudioEngine();
+            } else if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+                document.getElementById('audio-toggle-btn').innerText = 'Audio Active 🔊';
+            } else if (audioCtx.state === 'running') {
+                audioCtx.suspend();
+                document.getElementById('audio-toggle-btn').innerText = 'Audio Muted 🔇';
+            }
+        }
+
+        // Voice Speech & Popup Trigger
+        function handleTargetClick(speechPhrase, displayMsg) {
+            document.getElementById('tel-log').innerText = displayMsg;
+
+            // Toast feedback
+            toastText.innerText = displayMsg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+
+            // Text-to-Speech synthesis
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Cancel previous speech
+                const utterance = new SpeechSynthesisUtterance(speechPhrase);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.1;
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
         function onResults(results) {
@@ -132,13 +217,18 @@
 
                 const idx = results.multiHandLandmarks[0][8];
 
+                // Draw ONLY Index Fingertip
                 const px = idx.x * canvas.width;
                 const py = idx.y * canvas.height;
                 ctx.beginPath();
                 ctx.arc(px, py, 8, 0, 2 * Math.PI);
                 ctx.fillStyle = '#06b6d4';
                 ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#38bdf8';
+                ctx.stroke();
 
+                // Screen Mapping
                 const targetX = (1.0 - idx.x) * window.innerWidth;
                 const targetY = idx.y * window.innerHeight;
                 lastX += (targetX - lastX) * 0.6;
@@ -148,9 +238,18 @@
                 cursor.style.top = lastY + 'px';
                 document.getElementById('tel-pos').innerText = Math.round(lastX) + ', ' + Math.round(lastY);
 
-                const val = Math.min(100, Math.max(0, Math.round((1.0 - idx.y) * 100)));
-                volMeter.style.width = val + '%';
+                // Direct Dynamic Volume Control (Hand Height: Up = 100%, Down = 0%)
+                const volPct = Math.min(100, Math.max(0, Math.round((1.0 - idx.y) * 100)));
+                volMeter.style.width = volPct + '%';
+                volLabel.innerText = volPct + '%';
 
+                // Adjust audio gain in real time
+                if (gainNode && audioCtx && audioCtx.state === 'running') {
+                    const gainVal = volPct / 100;
+                    gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                }
+
+                // Dwell Hover Click (0.5s)
                 const elem = document.elementFromPoint(lastX, lastY);
                 const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
 
@@ -161,8 +260,12 @@
                     } else if (Date.now() - hoverStart >= 500) {
                         cursor.classList.add('clicking');
                         clickable.click();
-                        setTimeout(() => cursor.classList.remove('clicking'), 250);
-                        hoverStart = Date.now() + 1000;
+                        clickable.classList.add('ring-4', 'ring-cyan-400');
+                        setTimeout(() => {
+                            cursor.classList.remove('clicking');
+                            clickable.classList.remove('ring-4', 'ring-cyan-400');
+                        }, 300);
+                        hoverStart = Date.now() + 1200; // Debounce
                     }
                 } else {
                     currentHovered = null;
