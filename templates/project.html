@@ -56,7 +56,6 @@
             transition: opacity 0.05s ease-out;
         }
 
-        /* Drowsiness Emergency Red Flasher */
         #drowsy-strobe {
             position: fixed;
             inset: 0;
@@ -324,15 +323,13 @@
                 </div>
                 {% endif %}
 
-                <!-- 8. P08: Advanced Driver Drowsiness Alarm & Vigilance System -->
+                <!-- 8. P08: Strict Dual-Eye Drowsiness Alarm -->
                 {% if 'p08' in project.id %}
                 <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
-                    
-                    <!-- Top Status Strip -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
                         <div>
-                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Driver Eye Aspect Ratio (EAR) Telemetry</h4>
-                            <p class="text-xs text-slate-500">Continuous eye closure duration monitoring with dual-tone siren alarm.</p>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Strict Dual-Eye Aspect Ratio (EAR) Telemetry</h4>
+                            <p class="text-xs text-slate-500">Alarm triggers exclusively when BOTH eyes are closed simultaneously for &gt; 1.5s.</p>
                         </div>
                         <div id="drowsy-alarm-badge" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -340,15 +337,13 @@
                         </div>
                     </div>
 
-                    <!-- Main Dynamic Drowsiness Banner -->
                     <div id="drowsy-main-banner" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm transition-all duration-150">
-                        🟢 DRIVER ATTENTIVE &bull; EYES OPEN &amp; FOCUSED (EAR NORMAL)
+                        🟢 DRIVER ATTENTIVE &bull; BOTH EYES OPEN &amp; FOCUSED
                     </div>
 
-                    <!-- Closed Eyes Duration Bar -->
                     <div class="space-y-1">
                         <div class="flex justify-between font-mono text-[11px] text-slate-400">
-                            <span>Closed Eyes Duration (Alarm triggers at 1.5s):</span>
+                            <span>Both Eyes Closed Duration (Alarm triggers at 1.5s):</span>
                             <span id="drowsy-timer-text" class="text-emerald-400 font-bold">0.0s / 1.5s</span>
                         </div>
                         <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5">
@@ -356,37 +351,69 @@
                         </div>
                     </div>
 
-                    <!-- Metrics Grid -->
                     <div class="grid grid-cols-3 gap-3 text-center font-mono text-xs">
                         <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
-                            <span class="text-slate-500 text-[10px] block mb-0.5">EYE ASPECT RATIO (EAR)</span>
-                            <span id="ear-metric-val" class="text-cyan-400 font-bold text-sm">0.315</span>
+                            <span class="text-slate-500 text-[10px] block mb-0.5">LEFT / RIGHT EAR</span>
+                            <span id="ear-metric-val" class="text-cyan-400 font-bold text-sm">L: 0.32 | R: 0.31</span>
                         </div>
                         <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
                             <span class="text-slate-500 text-[10px] block mb-0.5">ALARM SIREN</span>
                             <span id="siren-state-val" class="text-slate-500 font-bold text-sm">STANDBY 🔈</span>
                         </div>
                         <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
-                            <span class="text-slate-500 text-[10px] block mb-0.5">INCIDENT COUNTER</span>
+                            <span class="text-slate-500 text-[10px] block mb-0.5">INCIDENTS</span>
                             <span id="drowsy-incident-count" class="text-amber-400 font-bold text-sm">0 EVENTS</span>
                         </div>
                     </div>
-
                 </div>
                 {% endif %}
 
-                <!-- 9. P09: Virtual Drawing Board -->
+                <!-- 9. P09: Professional Virtual Drawing Board (Start/Stop & Hover Mode) -->
                 {% if 'p09' in project.id %}
-                <div class="glass-panel rounded-xl p-4 border-slate-800 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-mono text-slate-400 uppercase tracking-wider">Canvas Control (Draw with Index)</span>
-                        <div class="flex gap-2">
-                            <button onclick="setDrawColor('#06b6d4')" class="w-6 h-6 rounded-full bg-cyan-400 border border-white"></button>
-                            <button onclick="setDrawColor('#10b981')" class="w-6 h-6 rounded-full bg-emerald-400 border border-white"></button>
-                            <button onclick="setDrawColor('#f59e0b')" class="w-6 h-6 rounded-full bg-amber-400 border border-white"></button>
-                            <button onclick="clearCanvas()" class="px-2.5 py-1 bg-red-950 border border-red-800 rounded font-mono text-[10px] text-red-300">CLEAR</button>
+                <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
+                    
+                    <!-- Drawing Top Controls Bar -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <button id="draw-toggle-btn" onclick="toggleDrawingMasterState()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-mono text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/40">
+                                <span>✏️</span>
+                                <span id="draw-toggle-label">DRAWING ACTIVE</span>
+                            </button>
+                            <span id="draw-gesture-badge" class="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-cyan-400 font-mono text-xs">
+                                Gesture: ☝️ DRAWING
+                            </span>
+                        </div>
+
+                        <!-- Color Palette & Stroke Tools -->
+                        <div class="flex items-center gap-2">
+                            <button onclick="setDrawColor('#06b6d4')" class="w-7 h-7 rounded-full bg-cyan-400 border-2 border-white/80 hover:scale-110 transition-transform shadow"></button>
+                            <button onclick="setDrawColor('#10b981')" class="w-7 h-7 rounded-full bg-emerald-400 border-2 border-white/80 hover:scale-110 transition-transform shadow"></button>
+                            <button onclick="setDrawColor('#f59e0b')" class="w-7 h-7 rounded-full bg-amber-400 border-2 border-white/80 hover:scale-110 transition-transform shadow"></button>
+                            <button onclick="setDrawColor('#f43f5e')" class="w-7 h-7 rounded-full bg-rose-500 border-2 border-white/80 hover:scale-110 transition-transform shadow"></button>
+                            <button onclick="setDrawColor('#ffffff')" class="w-7 h-7 rounded-full bg-white border-2 border-slate-400 hover:scale-110 transition-transform shadow"></button>
+                            <div class="h-6 w-px bg-slate-700 mx-1"></div>
+                            <button onclick="clearCanvas()" class="px-3 py-1.5 bg-red-950/80 border border-red-800 hover:bg-red-800 rounded-lg font-mono text-xs text-red-300 font-bold transition-all">
+                                🗑️ CLEAR
+                            </button>
                         </div>
                     </div>
+
+                    <!-- Mode Info Strip -->
+                    <div class="grid grid-cols-3 gap-3 text-center font-mono text-xs">
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+                            <span class="text-slate-500 text-[10px] block">1 FINGER UP (☝️)</span>
+                            <span class="text-cyan-400 font-bold">DRAW INK ON SCREEN</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+                            <span class="text-slate-500 text-[10px] block">2 FINGERS UP (✌️)</span>
+                            <span class="text-amber-400 font-bold">HOVER / MOVE (NO INK)</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+                            <span class="text-slate-500 text-[10px] block">MASTER TOGGLE</span>
+                            <span id="master-status-text" class="text-emerald-400 font-bold">ENABLED 🟢</span>
+                        </div>
+                    </div>
+
                 </div>
                 {% endif %}
 
@@ -478,12 +505,16 @@
                     <h3 class="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2">
                         <span>💡</span> GUIDE
                     </h3>
-                    <div class="text-xs text-slate-400 leading-relaxed font-sans">
+                    <div class="text-xs text-slate-400 leading-relaxed font-sans space-y-2">
                         {% if 'p08' in project.id %}
-                        • <strong>Eye Aspect Ratio (EAR):</strong> Real-time tracking calculates the vertical openness of both eyes.<br><br>
-                        • <strong>Emergency Alarm Trigger:</strong> If both eyes remain closed for longer than <strong>1.5 seconds</strong>, the system activates an emergency siren, screen strobe, and loud voice alert until eyes reopen.
+                        <p>• <strong>Strict Dual-Eye Alarm:</strong> Both left and right eyes must be closed for &gt; 1.5 seconds to trigger.</p>
+                        <p>• <strong>Siren &amp; Voice:</strong> Plays high-pitch siren and vocal alarm until both eyes reopen.</p>
+                        {% elif 'p09' in project.id %}
+                        <p>• <strong>Start/Draw:</strong> Raise only <strong>1 finger (Index ☝️)</strong> to draw ink.</p>
+                        <p>• <strong>Hover/Stop:</strong> Raise <strong>2 fingers (Index + Middle ✌️)</strong> to move the pencil cursor without drawing.</p>
+                        <p>• <strong>Master Stop:</strong> Click the <strong>DRAWING ACTIVE</strong> button to toggle the master pencil on/off.</p>
                         {% else %}
-                        {{ project.desc }}
+                        <p>{{ project.desc }}</p>
                         {% endif %}
                     </div>
                 </div>
@@ -532,7 +563,7 @@
             } catch (e) {}
         }
 
-        // P08: Drowsiness Siren Generator
+        // P08: Strict Dual-Eye Drowsiness Siren Generator
         let sirenAudioCtx = null, sirenOsc = null, sirenGain = null;
         let sirenInterval = null;
         let isSirenActive = false;
@@ -545,21 +576,20 @@
                 sirenGain = sirenAudioCtx.createGain();
 
                 sirenOsc.type = 'sawtooth';
-                sirenOsc.frequency.setValueAtTime(800, sirenAudioCtx.currentTime);
-                sirenGain.gain.setValueAtTime(0.25, sirenAudioCtx.currentTime);
+                sirenOsc.frequency.setValueAtTime(850, sirenAudioCtx.currentTime);
+                sirenGain.gain.setValueAtTime(0.28, sirenAudioCtx.currentTime);
 
                 sirenOsc.connect(sirenGain);
                 sirenGain.connect(sirenAudioCtx.destination);
                 sirenOsc.start();
 
-                // Pulsing Siren pitch (800Hz <-> 450Hz)
                 let high = true;
                 sirenInterval = setInterval(() => {
                     if (sirenAudioCtx && sirenOsc) {
-                        sirenOsc.frequency.setValueAtTime(high ? 800 : 450, sirenAudioCtx.currentTime);
+                        sirenOsc.frequency.setValueAtTime(high ? 850 : 420, sirenAudioCtx.currentTime);
                         high = !high;
                     }
-                }, 180);
+                }, 160);
             }
         }
 
@@ -578,12 +608,11 @@
             }
         }
 
-        // P08 Drowsiness State Machine
         let eyesClosedStartTime = null;
         let drowsinessAlertTriggered = false;
         let drowsyIncidentTotal = 0;
 
-        function handleDrowsinessAlert(eyesClosedDuration, isEyesClosed, avgEyeDist) {
+        function handleStrictDrowsiness(leftDist, rightDist, isBothEyesClosed) {
             const banner = document.getElementById('drowsy-main-banner');
             const timerText = document.getElementById('drowsy-timer-text');
             const pBar = document.getElementById('drowsy-progress-bar');
@@ -593,16 +622,21 @@
             const badge = document.getElementById('drowsy-alarm-badge');
             const badgeText = document.getElementById('drowsy-alarm-text');
 
-            if (earVal) earVal.innerText = avgEyeDist.toFixed(3);
+            if (earVal) earVal.innerText = `L: ${leftDist.toFixed(3)} | R: ${rightDist.toFixed(3)}`;
 
-            if (isEyesClosed) {
-                const sec = (eyesClosedDuration / 1000).toFixed(1);
-                const pct = Math.min(100, (eyesClosedDuration / 1500) * 100);
+            if (isBothEyesClosed) {
+                if (!eyesClosedStartTime) {
+                    eyesClosedStartTime = Date.now();
+                }
+                const duration = Date.now() - eyesClosedStartTime;
+                const sec = (duration / 1000).toFixed(1);
+                const pct = Math.min(100, (duration / 1500) * 100);
+
                 if (timerText) timerText.innerText = `${sec}s / 1.5s`;
                 if (pBar) pBar.style.width = `${pct}%`;
 
-                // 1.5s Closed Eyes Threshold Reached -> FIRE EMERGENCY ALARM!
-                if (eyesClosedDuration >= 1500) {
+                // 1.5s Continuous Dual Eye Closure -> TRIGGER ALARM
+                if (duration >= 1500) {
                     if (!drowsinessAlertTriggered) {
                         drowsinessAlertTriggered = true;
                         drowsyIncidentTotal++;
@@ -611,16 +645,15 @@
 
                         if ('speechSynthesis' in window) {
                             window.speechSynthesis.cancel();
-                            const u = new SpeechSynthesisUtterance("Wake up! Driver drowsiness detected! Pull over immediately!");
+                            const u = new SpeechSynthesisUtterance("Wake up! Both eyes closed detected! Open your eyes immediately!");
                             u.rate = 1.1;
-                            u.pitch = 1.2;
                             window.speechSynthesis.speak(u);
                         }
                     }
 
                     if (banner) {
                         banner.className = "p-4 rounded-xl bg-red-600/30 border border-red-500 text-red-300 text-center font-mono font-bold text-sm animate-pulse transition-all duration-75";
-                        banner.innerHTML = "🚨 EMERGENCY: PROLONGED EYE CLOSURE DETECTED &bull; WAKE UP!";
+                        banner.innerHTML = "🚨 EMERGENCY: BOTH EYES CLOSED &bull; WAKE UP IMMEDIATELY!";
                     }
                     if (sirenVal) {
                         sirenVal.className = "text-red-400 font-bold text-sm animate-bounce";
@@ -629,10 +662,10 @@
                     if (badge) badge.className = "px-3.5 py-1.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2";
                     if (badgeText) badgeText.innerText = "ALARM: TRIGGERED 🔴";
                     if (drowsyStrobe) drowsyStrobe.style.display = "block";
-                    document.getElementById('tel-log').innerText = "EMERGENCY: DROWSINESS ALARM ACTIVE";
+                    document.getElementById('tel-log').innerText = "EMERGENCY: BOTH EYES CLOSED!";
                 }
             } else {
-                // Eyes Reopened -> Reset & Silence Alarm
+                eyesClosedStartTime = null;
                 if (drowsinessAlertTriggered) {
                     drowsinessAlertTriggered = false;
                     stopDrowsinessSiren();
@@ -643,7 +676,7 @@
                 if (pBar) pBar.style.width = "0%";
                 if (banner) {
                     banner.className = "p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm transition-all duration-150";
-                    banner.innerHTML = "🟢 DRIVER ATTENTIVE &bull; EYES OPEN &amp; FOCUSED (EAR NORMAL)";
+                    banner.innerHTML = "🟢 DRIVER ATTENTIVE &bull; BOTH EYES OPEN &amp; FOCUSED";
                 }
                 if (sirenVal) {
                     sirenVal.className = "text-slate-500 font-bold text-sm";
@@ -652,13 +685,50 @@
                 if (badge) badge.className = "px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2";
                 if (badgeText) badgeText.innerText = "ALARM: ARMED 🟢";
                 if (drowsyStrobe) drowsyStrobe.style.display = "none";
-                document.getElementById('tel-log').innerText = "Vigilance Optimal (Eyes Open)";
+                document.getElementById('tel-log').innerText = "Vigilance Normal (Eyes Open)";
+            }
+        }
+
+        // P09: Virtual Drawing Board Engine (Start/Stop + Hover Move Mode)
+        let drawPoints = [];
+        let currentStroke = [];
+        let drawColor = '#06b6d4';
+        let isMasterDrawingActive = true;
+
+        function setDrawColor(c) { 
+            drawColor = c;
+            playChirpSound(750);
+        }
+
+        function clearCanvas() { 
+            drawPoints = [];
+            currentStroke = [];
+            playChirpSound(450);
+        }
+
+        function toggleDrawingMasterState() {
+            isMasterDrawingActive = !isMasterDrawingActive;
+            const btn = document.getElementById('draw-toggle-btn');
+            const label = document.getElementById('draw-toggle-label');
+            const status = document.getElementById('master-status-text');
+
+            if (isMasterDrawingActive) {
+                btn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-mono text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/40";
+                label.innerText = "DRAWING ACTIVE";
+                status.className = "text-emerald-400 font-bold";
+                status.innerText = "ENABLED 🟢";
+                playChirpSound(880);
+            } else {
+                btn.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 font-mono text-xs font-bold transition-all flex items-center gap-2 border border-slate-700";
+                label.innerText = "DRAWING PAUSED";
+                status.className = "text-red-400 font-bold";
+                status.innerText = "STOPPED 🛑";
+                playChirpSound(350);
             }
         }
 
         // P07: Face Mask Compliance State
         let lastMaskState = null, maskDebounceTime = 0, totalScans = 0, maskPassCount = 0;
-
         function handleMaskComplianceState(isMasked, confidencePct) {
             const banner = document.getElementById('mask-main-banner');
             const gateBadge = document.getElementById('mask-gate-badge');
@@ -841,11 +911,6 @@
             setTimeout(() => { rpsLocked = false; rpsHoldStart = null; document.getElementById('rps-result').innerText = "HOLD FOR 3s AGAIN"; }, 3000);
         }
 
-        // P09 Drawing Board
-        let drawPoints = [], drawColor = '#06b6d4';
-        function setDrawColor(c) { drawColor = c; }
-        function clearCanvas() { drawPoints = []; }
-
         // P10 Slide Presentation
         let slideNo = 1;
         const slides = [
@@ -938,41 +1003,26 @@
                 const boxW = (maxX - minX) * canvas.width;
                 const boxH = (maxY - minY) * canvas.height;
 
-                // Accurate Eye Aspect Ratio (EAR)
+                // Independent Left and Right Eye Aspect Ratios
                 const leftEyeDist = Math.hypot(face[159].x - face[145].x, face[159].y - face[145].y);
                 const rightEyeDist = Math.hypot(face[386].x - face[374].x, face[386].y - face[374].y);
-                const avgEyeDist = (leftEyeDist + rightEyeDist) / 2;
+                
+                // Both eyes closed condition
+                const isLeftClosed = leftEyeDist < 0.015;
+                const isRightClosed = rightEyeDist < 0.015;
+                const isBothClosed = isLeftClosed && isRightClosed;
 
-                // 8. P08: Drowsiness Alarm & Duration Engine
+                // 8. P08: Strict Dual-Eye Drowsiness
                 if (projectId.includes('p08')) {
-                    const isClosed = avgEyeDist < 0.015;
+                    handleStrictDrowsiness(leftEyeDist, rightEyeDist, isBothClosed);
 
-                    if (isClosed) {
-                        if (!eyesClosedStartTime) {
-                            eyesClosedStartTime = Date.now();
-                        }
-                        const duration = Date.now() - eyesClosedStartTime;
-                        handleDrowsinessAlert(duration, true, avgEyeDist);
+                    ctx.strokeStyle = isBothClosed ? '#ef4444' : '#10b981';
+                    ctx.lineWidth = isBothClosed ? 3 : 2;
+                    ctx.strokeRect(boxX, boxY, boxW, boxH);
 
-                        // HUD Red Outline on Face
-                        ctx.strokeStyle = '#ef4444';
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(boxX, boxY, boxW, boxH);
-                        ctx.fillStyle = '#ef4444';
-                        ctx.font = 'bold 14px JetBrains Mono, monospace';
-                        ctx.fillText(`EYES CLOSED [${(duration/1000).toFixed(1)}s]`, boxX + 6, boxY - 10);
-                    } else {
-                        eyesClosedStartTime = null;
-                        handleDrowsinessAlert(0, false, avgEyeDist);
-
-                        // HUD Normal Green Outline
-                        ctx.strokeStyle = '#10b981';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(boxX, boxY, boxW, boxH);
-                        ctx.fillStyle = '#10b981';
-                        ctx.font = '13px JetBrains Mono, monospace';
-                        ctx.fillText("VIGILANCE: NORMAL", boxX + 6, boxY - 10);
-                    }
+                    ctx.fillStyle = isBothClosed ? '#ef4444' : '#10b981';
+                    ctx.font = 'bold 13px JetBrains Mono, monospace';
+                    ctx.fillText(isBothClosed ? "▲ BOTH EYES CLOSED" : "● EYES ATTENTIVE", boxX + 6, boxY - 10);
                 }
 
                 // 7. P07: Mask Detection
@@ -1011,7 +1061,7 @@
                     }
 
                     if (!attendanceDebounce) {
-                        const isClosed = avgEyeDist < 0.015;
+                        const isClosed = isBothClosed;
                         if (isClosed && !eyeWasClosed) {
                             eyeWasClosed = true;
                         } else if (!isClosed && eyeWasClosed) {
@@ -1037,14 +1087,13 @@
             } else {
                 document.getElementById('tel-status').innerText = 'Scanning';
                 if (projectId.includes('p08')) {
-                    eyesClosedStartTime = null;
-                    handleDrowsinessAlert(0, false, 0.3);
+                    handleStrictDrowsiness(0.3, 0.3, false);
                 }
             }
             ctx.restore();
         }
 
-        // Hands Results (P01–P05, P09–P12)
+        // Hands Pipeline (P01–P05, P09–P12)
         function onHandResults(results) {
             loading.style.display = 'none';
             ctx.save();
@@ -1058,6 +1107,7 @@
                 const wrist = lms[0];
                 const thumbTip = lms[4];
                 const indexTip = lms[8];
+                const middleTip = lms[12];
                 const pinkyMCP = lms[17];
 
                 const pinchDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
@@ -1201,11 +1251,52 @@
                     }
                 }
 
-                // 9. P09 Virtual Drawing
+                // 9. P09 Virtual Drawing Board (Start / Stop & Hover Implementation)
                 if (projectId.includes('p09')) {
-                    if (activeFingers[1] && !activeFingers[2]) {
-                        drawPoints.push({ x: indexTip.x * canvas.width, y: indexTip.y * canvas.height, color: drawColor });
+                    const badge = document.getElementById('draw-gesture-badge');
+                    const ptX = indexTip.x * canvas.width;
+                    const ptY = indexTip.y * canvas.height;
+
+                    const isIndexOnly = activeFingers[1] && !activeFingers[2];
+                    const isTwoFingersHover = activeFingers[1] && activeFingers[2];
+
+                    // Render Pointer Cursor on Canvas
+                    ctx.beginPath();
+                    ctx.arc(ptX, ptY, isIndexOnly && isMasterDrawingActive ? 9 : 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = isIndexOnly && isMasterDrawingActive ? drawColor : '#f59e0b';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+
+                    if (isMasterDrawingActive && isIndexOnly) {
+                        // Drawing Mode: record point
+                        if (badge) {
+                            badge.className = "px-3 py-1.5 bg-cyan-950 border border-cyan-500/50 rounded-lg text-cyan-300 font-mono text-xs font-bold";
+                            badge.innerText = "Gesture: ☝️ INK ACTIVE";
+                        }
+                        currentStroke.push({ x: ptX, y: ptY, color: drawColor });
+                    } else {
+                        // Hover / Stopped Mode: close current stroke and do not add ink
+                        if (currentStroke.length > 0) {
+                            drawPoints.push([...currentStroke]);
+                            currentStroke = [];
+                        }
+
+                        if (badge) {
+                            if (!isMasterDrawingActive) {
+                                badge.className = "px-3 py-1.5 bg-red-950 border border-red-500/50 rounded-lg text-red-300 font-mono text-xs font-bold";
+                                badge.innerText = "🛑 MASTER STOPPED";
+                            } else if (isTwoFingersHover) {
+                                badge.className = "px-3 py-1.5 bg-amber-950 border border-amber-500/50 rounded-lg text-amber-300 font-mono text-xs font-bold";
+                                badge.innerText = "Gesture: ✌️ HOVER (NO INK)";
+                            } else {
+                                badge.className = "px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 font-mono text-xs";
+                                badge.innerText = "Gesture: ✋ IDLE";
+                            }
+                        }
                     }
+                    document.getElementById('tel-log').innerText = isMasterDrawingActive && isIndexOnly ? "Ink Active (Drawing)" : "Pencil Lifted (Hover)";
                 }
 
                 // 12. P12 Sign Language Recognition
@@ -1260,17 +1351,41 @@
                     if (pBar) pBar.style.width = '0%';
                     if (tText) tText.innerText = '0.0s / 3.0s';
                 }
+
+                if (projectId.includes('p09') && currentStroke.length > 0) {
+                    drawPoints.push([...currentStroke]);
+                    currentStroke = [];
+                }
             }
 
-            if (projectId.includes('p09') && drawPoints.length > 1) {
-                for (let i = 1; i < drawPoints.length; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(drawPoints[i - 1].x, drawPoints[i - 1].y);
-                    ctx.lineTo(drawPoints[i].x, drawPoints[i].y);
-                    ctx.strokeStyle = drawPoints[i].color;
-                    ctx.lineWidth = 6;
-                    ctx.lineCap = 'round';
-                    ctx.stroke();
+            // Render Virtual Drawing Canvas Strokes (P09)
+            if (projectId.includes('p09')) {
+                // Completed strokes
+                drawPoints.forEach(stroke => {
+                    if (stroke.length > 1) {
+                        for (let i = 1; i < stroke.length; i++) {
+                            ctx.beginPath();
+                            ctx.moveTo(stroke[i - 1].x, stroke[i - 1].y);
+                            ctx.lineTo(stroke[i].x, stroke[i].y);
+                            ctx.strokeStyle = stroke[i].color;
+                            ctx.lineWidth = 6;
+                            ctx.lineCap = 'round';
+                            ctx.stroke();
+                        }
+                    }
+                });
+
+                // Active ongoing stroke
+                if (currentStroke.length > 1) {
+                    for (let i = 1; i < currentStroke.length; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(currentStroke[i - 1].x, currentStroke[i - 1].y);
+                        ctx.lineTo(currentStroke[i].x, currentStroke[i].y);
+                        ctx.strokeStyle = currentStroke[i].color;
+                        ctx.lineWidth = 6;
+                        ctx.lineCap = 'round';
+                        ctx.stroke();
+                    }
                 }
             }
 
