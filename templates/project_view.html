@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Vision Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .stage-container {
+            position: relative;
+            width: 100%;
+            max-width: 960px;
+            margin: 20px auto;
+            background: #0f172a;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .stage-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+        .fullscreen-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .fullscreen-btn:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="back-link">← Back to Dashboard</a>
+        <h2>{{ title }}</h2>
+        <p>{{ desc }}</p>
+    </div>
+
+    <div class="stage-container" id="videoBox">
+        <img src="{{ url_for('video_feed', project_id=project_id) }}" alt="Live Feed">
+        <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ Fullscreen</button>
+    </div>
+
+    <script>
+        function toggleFullScreen() {
+            const elem = document.getElementById("videoBox");
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
+                    alert(`Error attempting full-screen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>

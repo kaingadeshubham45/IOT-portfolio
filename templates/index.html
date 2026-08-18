@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Vision IoT Command Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="badge-live">
+            <div class="pulse-dot"></div>
+            Edge Vision Engine Active
+        </div>
+        <h1>Vision & IoT Command Hub</h1>
+        <p>Real-time OpenCV, MediaPipe gesture tracking, and automated IoT edge controls.</p>
+    </header>
+
+    <main class="grid-container">
+        {% for p in projects %}
+        <div class="card">
+            <div class="card-top">
+                <div class="card-icon">{{ p.icon }}</div>
+                <span class="status-indicator">READY</span>
+            </div>
+            <h2>{{ p.title }}</h2>
+            <p>{{ p.description }}</p>
+            <a href="/project/{{ p.id }}" class="btn">
+                Launch System
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+        {% else %}
+        <div class="card" style="grid-column: 1 / -1; text-align: center;">
+            <p>No project scripts detected in <code>projects/</code> directory.</p>
+        </div>
+        {% endfor %}
+    </main>
+</body>
+</html>
