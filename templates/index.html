@@ -1,107 +1,362 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Vision &amp; IoT Edge Hub</title>
+    <title>NEXUS-VISION // 12-Core Edge AI Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* Fallback dark theme styles if CDN blocks */
+        :root {
+            --neon-cyan: #06b6d4;
+            --neon-blue: #38bdf8;
+            --neon-purple: #a855f7;
+            --neon-emerald: #10b981;
+        }
+
         body {
-            background-color: #020617;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #020617;
             color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
+            overflow-x: hidden;
         }
-        .hub-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+
+        /* Interactive Particle Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
         }
-        .hub-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #1e293b;
-            padding-bottom: 24px;
-            margin-bottom: 36px;
+
+        /* Scanline Overlay */
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.6;
         }
-        .grid-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
+
+        /* Holographic Glass */
+        .holo-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
         }
-        .card {
-            background: #0f172a;
-            border: 1px solid #1e293b;
-            border-radius: 16px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+
+        .holo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.12), transparent);
+            transition: 0.6s;
         }
-        .card:hover {
-            border-color: #06b6d4;
+
+        .holo-card:hover::before {
+            left: 100%;
         }
-        .btn-launch {
-            background: #1e293b;
-            color: #ffffff;
-            text-align: center;
-            padding: 10px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            margin-top: 20px;
-            display: block;
-            border: 1px solid #334155;
+
+        .holo-card:hover {
+            transform: translateY(-6px) scale(1.015);
+            border-color: rgba(6, 182, 212, 0.5);
+            box-shadow: 0 0 35px rgba(6, 182, 212, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.08);
         }
-        .btn-launch:hover {
-            background: #0891b2;
-            border-color: #06b6d4;
+
+        .text-glow-cyan {
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+        }
+        
+        .text-glow-purple {
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+        }
+
+        /* Pulse Ring */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .pulse-ring {
+            animation: pulse-ring 3s infinite ease-in-out;
         }
     </style>
 </head>
-<body>
+<body class="relative min-h-screen selection:bg-cyan-500 selection:text-black">
 
-    <div class="hub-container">
-        <div class="hub-header flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-800">
-            <div>
-                <h1 class="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-                    <span>🤖</span> AI Vision &amp; IoT Command Hub
-                </h1>
-                <p class="text-slate-400 text-sm mt-1">12 Real-Time Edge Computer Vision &amp; Hardware Automation Modules</p>
-            </div>
-            <div class="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-                ● Live Edge Engine Active
-            </div>
-        </div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="scanlines"></div>
 
-        <div class="grid-cards grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for key, proj in projects.items() %}
-            <div class="card bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+    <!-- Main Container -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col justify-between min-h-screen">
+        
+        <!-- Header Strip -->
+        <header class="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800/80">
+            <div class="flex items-center gap-3.5">
+                <div class="relative w-11 h-11 rounded-2xl bg-cyan-950/80 border border-cyan-500/50 flex items-center justify-center text-xl shadow-lg shadow-cyan-950/50">
+                    <span class="pulse-ring absolute inset-0 rounded-2xl border border-cyan-400/40"></span>
+                    <span>⚡</span>
+                </div>
                 <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-display font-black text-xl tracking-tight text-white">NEXUS<span class="text-cyan-400">VISION</span></span>
+                        <span class="font-mono text-[9px] px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 font-bold uppercase tracking-widest">PRO V2.4</span>
+                    </div>
+                    <p class="font-mono text-[11px] text-slate-400">Distributed WebGL &amp; Edge Neural Core</p>
+                </div>
+            </div>
+
+            <!-- Global Live Telemetry Status -->
+            <div class="flex items-center gap-4 text-xs font-mono">
+                <div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl holo-card">
+                    <span class="text-slate-400">LATENCY:</span>
+                    <span id="tel-latency" class="text-emerald-400 font-bold">3.2 ms</span>
+                </div>
+                <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl holo-card">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-emerald-400 font-bold">12/12 ENGINES ONLINE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="text-center py-12 md:py-16 space-y-6 max-w-4xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full holo-card border-cyan-500/30 text-cyan-300 font-mono text-xs uppercase tracking-widest shadow-lg">
+                <span class="text-sm">🪐</span> Zero-Server MediaPipe Neural Architecture
+            </div>
+            
+            <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none text-white">
+                Next-Gen <span class="bg-gradient-to-r from-cyan-400 via-sky-300 to-purple-400 bg-clip-text text-transparent text-glow-cyan">Computer Vision</span> Matrix
+            </h1>
+
+            <p class="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                Hardware-accelerated touchless human-computer interaction, biometric authentication, and assistive sign language interpretation running directly on your edge client.
+            </p>
+
+            <!-- Filter Categories -->
+            <div class="flex flex-wrap justify-center gap-2 pt-2 font-mono text-xs">
+                <button onclick="filterCards('all')" class="filter-btn px-4 py-2 rounded-xl holo-card border-cyan-500/50 bg-cyan-950/40 text-cyan-300 font-bold transition-all">ALL (12)</button>
+                <button onclick="filterCards('hands')" class="filter-btn px-4 py-2 rounded-xl holo-card text-slate-400 hover:text-white transition-all">✋ HAND GESTURES (8)</button>
+                <button onclick="filterCards('face')" class="filter-btn px-4 py-2 rounded-xl holo-card text-slate-400 hover:text-white transition-all">👤 FACIAL MESH (3)</button>
+                <button onclick="filterCards('ai')" class="filter-btn px-4 py-2 rounded-xl holo-card text-slate-400 hover:text-white transition-all">🤖 ASSISTIVE AI (1)</button>
+            </div>
+        </section>
+
+        <!-- 12-Card Holographic Project Grid -->
+        <main id="projects-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-16">
+            
+            {% for p in projects %}
+            <a href="/project/{{ p.id }}" 
+               onmouseenter="playHoverSound()" 
+               onclick="playClickSound()"
+               data-category="{% if 'p06' in p.id or 'p07' in p.id or 'p08' in p.id %}face{% elif 'p12' in p.id %}ai{% else %}hands{% endif %}"
+               class="project-card holo-card rounded-2xl p-5 flex flex-col justify-between group">
+                
+                <div>
+                    <!-- Card Top Strip -->
                     <div class="flex items-center justify-between mb-4">
-                        <span class="text-3xl p-2.5 bg-slate-950 rounded-xl border border-slate-800">{{ proj.icon }}</span>
-                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800">
-                            {{ proj.id[:3].upper() }}
+                        <div class="w-12 h-12 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-center text-2xl group-hover:scale-110 group-hover:border-cyan-500/50 transition-all shadow-inner">
+                            {{ p.icon }}
+                        </div>
+                        <span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-900/90 text-cyan-400 border border-slate-800 group-hover:border-cyan-500/40 transition-colors uppercase tracking-wider">
+                            {{ p.id[:3].upper() }}
                         </span>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">
-                        {{ proj.title }}
+
+                    <!-- Title & Details -->
+                    <h3 class="text-base font-bold text-white group-hover:text-cyan-300 transition-colors tracking-tight mb-2">
+                        {{ p.title }}
                     </h3>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        {{ proj.desc }}
+                    <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">
+                        {{ p.desc }}
                     </p>
                 </div>
-                <a href="/project/{{ proj.id }}" class="btn-launch">
-                    Launch Module &rarr;
-                </a>
-            </div>
+
+                <!-- Launch Button Action -->
+                <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between font-mono text-[11px]">
+                    <span class="text-slate-500 group-hover:text-cyan-400 transition-colors">LAUNCH ENGINE</span>
+                    <span class="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-cyan-600 transition-all">
+                        &rarr;
+                    </span>
+                </div>
+            </a>
             {% endfor %}
-        </div>
+
+        </main>
+
+        <!-- Futuristic Footer -->
+        <footer class="pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-slate-500">
+            <div>
+                <span>ENGINE:</span> <span class="text-slate-400">MediaPipe &bull; WebGL &bull; Web Audio API</span>
+            </div>
+            <div>
+                <span>STATUS:</span> <span class="text-emerald-400 font-bold">READY FOR IMMERSIVE DEPLOYMENT</span>
+            </div>
+        </footer>
+
     </div>
 
+    <!-- WebGL Particle Simulation & Audio Scripts -->
+    <script>
+        // 1. Web Audio Micro-Synthesizer
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+
+        function playHoverSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(650, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.04);
+                gain.gain.setValueAtTime(0.02, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.04);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.04);
+            } catch (e) {}
+        }
+
+        function playClickSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.08);
+            } catch (e) {}
+        }
+
+        // 2. Interactive Interactive Starfield & Nebula Canvas
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const numParticles = Math.min(100, Math.floor(window.innerWidth / 14));
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                radius: Math.random() * 1.6 + 0.4,
+                color: Math.random() > 0.6 ? '#06b6d4' : (Math.random() > 0.3 ? '#38bdf8' : '#a855f7')
+            });
+        }
+
+        let mouse = { x: width / 2, y: height / 2 };
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        function renderStars() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Subtle Nebula Glow Behind Mouse
+            const grad = ctx.createRadialGradient(mouse.x, mouse.y, 10, mouse.x, mouse.y, 450);
+            grad.addColorStop(0, 'rgba(6, 182, 212, 0.07)');
+            grad.addColorStop(0.5, 'rgba(168, 85, 247, 0.03)');
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0) p.x = width;
+                if (p.x > width) p.x = 0;
+                if (p.y < 0) p.y = height;
+                if (p.y > height) p.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+
+                // Connect nearby stars with delicate laser lines
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 110) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(56, 189, 248, ${0.15 * (1 - dist / 110)})`;
+                        ctx.lineWidth = 0.6;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(renderStars);
+        }
+        renderStars();
+
+        // 3. Category Filter Logic
+        function filterCards(cat) {
+            playClickSound();
+            const cards = document.querySelectorAll('.project-card');
+            const btns = document.querySelectorAll('.filter-btn');
+
+            btns.forEach(btn => {
+                btn.className = "filter-btn px-4 py-2 rounded-xl holo-card text-slate-400 hover:text-white transition-all";
+            });
+            event.target.className = "filter-btn px-4 py-2 rounded-xl holo-card border-cyan-500/50 bg-cyan-950/40 text-cyan-300 font-bold transition-all";
+
+            cards.forEach(card => {
+                if (cat === 'all' || card.dataset.category === cat) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Live Simulated Latency Telemetry Jitter
+        setInterval(() => {
+            const latEl = document.getElementById('tel-latency');
+            if (latEl) {
+                const jitter = (2.8 + Math.random() * 0.9).toFixed(1);
+                latEl.innerText = `${jitter} ms`;
+            }
+        }, 1800);
+    </script>
 </body>
 </html>
