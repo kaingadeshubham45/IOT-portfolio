@@ -3,18 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS-VISION // 12-Core Edge AI Hub</title>
+    <title>AI &amp; Computer Vision Projects Hub</title>
     <!-- Standalone Compiled Tailwind CSS CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --neon-cyan: #06b6d4;
-            --neon-blue: #38bdf8;
-            --neon-purple: #a855f7;
-            --neon-emerald: #10b981;
-        }
-
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #020617;
@@ -25,7 +18,6 @@
         }
 
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .font-display { font-family: 'Space Grotesk', sans-serif; }
 
         #bg-canvas {
             position: fixed;
@@ -44,10 +36,9 @@
             background-size: 100% 3px, 6px 100%;
             pointer-events: none;
             z-index: 1;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
-        /* Guaranteed Fallback Card Styles (works even if CDN is blocked) */
         .holo-card {
             background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(16px);
@@ -68,10 +59,6 @@
             transform: translateY(-5px);
             border-color: rgba(6, 182, 212, 0.6);
             box-shadow: 0 0 25px rgba(6, 182, 212, 0.3);
-        }
-
-        .text-glow-cyan {
-            text-shadow: 0 0 18px rgba(6, 182, 212, 0.6);
         }
 
         .project-grid {
@@ -113,21 +100,17 @@
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="font-display font-black text-xl tracking-tight text-white">NEXUS<span class="text-cyan-400">VISION</span></span>
-                        <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 font-bold uppercase">PRO V2.4</span>
+                        <span class="font-bold text-xl tracking-tight text-white">AI Vision <span class="text-cyan-400">Hub</span></span>
+                        <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 font-semibold uppercase">12 Projects</span>
                     </div>
-                    <p class="font-mono text-xs text-gray-400">Distributed WebGL &amp; Edge Neural Core</p>
+                    <p class="font-mono text-xs text-gray-400">Python, OpenCV &amp; MediaPipe Suite</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-3 text-xs font-mono">
-                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800">
-                    <span class="text-gray-400">LATENCY:</span>
-                    <span id="tel-latency" class="text-green-400 font-bold">3.2 ms</span>
-                </div>
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800">
                     <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                    <span class="text-green-400 font-bold">12/12 ENGINES ONLINE</span>
+                    <span class="text-green-400 font-bold">12/12 ENGINES READY</span>
                 </div>
             </div>
         </header>
@@ -135,23 +118,23 @@
         <!-- Hero Section -->
         <section class="text-center py-10 space-y-4 max-w-3xl mx-auto">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-900 border border-cyan-500/40 text-cyan-300 font-mono text-xs uppercase tracking-wider">
-                🪐 Zero-Server MediaPipe Neural Architecture
+                🤖 Real-Time Computer Vision Applications
             </div>
             
-            <h1 class="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-                Next-Gen <span class="text-cyan-400 text-glow-cyan">Computer Vision</span> Matrix
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+                AI &amp; Computer Vision <span class="text-cyan-400">Projects Hub</span>
             </h1>
 
             <p class="text-xs sm:text-sm text-gray-400 max-w-xl mx-auto leading-relaxed">
-                Hardware-accelerated touchless interaction, biometric verification, and assistive sign language interpretation running client-side.
+                Explore hand gesture controls, face tracking systems, biometric attendance, and sign language recognition powered by browser vision engines.
             </p>
 
             <!-- Filters -->
             <div class="flex flex-wrap justify-center gap-2 pt-2 font-mono">
                 <button onclick="filterCards('all', event)" class="filter-btn active">ALL (12)</button>
                 <button onclick="filterCards('hands', event)" class="filter-btn">✋ HAND GESTURES (8)</button>
-                <button onclick="filterCards('face', event)" class="filter-btn">👤 FACIAL MESH (3)</button>
-                <button onclick="filterCards('ai', event)" class="filter-btn">🤖 ASSISTIVE AI (1)</button>
+                <button onclick="filterCards('face', event)" class="filter-btn">👤 FACE TRACKING (3)</button>
+                <button onclick="filterCards('ai', event)" class="filter-btn">🤟 SIGN LANGUAGE (1)</button>
             </div>
         </section>
 
@@ -181,7 +164,7 @@
                 </div>
 
                 <div class="pt-4 mt-3 border-t border-gray-800 flex items-center justify-between font-mono text-xs text-gray-500 group-hover:text-cyan-400">
-                    <span>LAUNCH ENGINE</span>
+                    <span>LAUNCH PROJECT</span>
                     <span>&rarr;</span>
                 </div>
             </a>
@@ -191,10 +174,10 @@
         <!-- Footer -->
         <footer class="pt-4 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-xs text-gray-500">
             <div>
-                <span>ENGINE:</span> <span class="text-gray-400">MediaPipe &bull; WebGL &bull; Web Audio API</span>
+                <span>BUILT WITH:</span> <span class="text-gray-400">Python &bull; Flask &bull; MediaPipe &bull; OpenCV</span>
             </div>
             <div>
-                <span>STATUS:</span> <span class="text-green-400 font-bold">READY FOR DEPLOYMENT</span>
+                <span>STATUS:</span> <span class="text-green-400 font-bold">READY TO RUN</span>
             </div>
         </footer>
 
@@ -258,11 +241,6 @@
                 }
             });
         }
-
-        setInterval(() => {
-            const latEl = document.getElementById('tel-latency');
-            if (latEl) latEl.innerText = `${(2.8 + Math.random() * 0.8).toFixed(1)} ms`;
-        }, 2000);
     </script>
 </body>
 </html>
