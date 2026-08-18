@@ -55,11 +55,22 @@
             z-index: 9990;
             transition: opacity 0.05s ease-out;
         }
+
+        /* Drowsiness Emergency Red Flasher */
+        #drowsy-strobe {
+            position: fixed;
+            inset: 0;
+            background: rgba(239, 68, 68, 0.25);
+            pointer-events: none;
+            z-index: 9980;
+            display: none;
+        }
     </style>
 </head>
 <body class="text-slate-100 min-h-screen relative select-none antialiased flex flex-col justify-between">
 
     <div id="screen-dimmer"></div>
+    <div id="drowsy-strobe"></div>
     <div id="virtual-cursor" class="v-cursor"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
@@ -280,28 +291,22 @@
                 </div>
                 {% endif %}
 
-                <!-- 7. P07: Professional Face Mask Compliance & Security Gate -->
+                <!-- 7. P07: Face Mask Detection -->
                 {% if 'p07' in project.id %}
                 <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
-                    
-                    <!-- Top Status Strip -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
                         <div>
                             <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Biometric Safety Compliance Protocol</h4>
-                            <p class="text-xs text-slate-500">Continuous lower-face landmark occlusion and safety barrier evaluation.</p>
+                            <p class="text-xs text-slate-500">Continuous lower-face landmark occlusion evaluation.</p>
                         </div>
                         <div id="mask-gate-badge" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                             <span id="gate-status-text">GATE: GRANTED 🟢</span>
                         </div>
                     </div>
-
-                    <!-- Main Dynamic Compliance Banner -->
                     <div id="mask-main-banner" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm transition-all duration-200">
                         😷 STATUS: MASK DETECTED &bull; COMPLIANCE VERIFIED (ACCESS AUTHORIZED)
                     </div>
-
-                    <!-- Metrics Grid -->
                     <div class="grid grid-cols-3 gap-3 text-center font-mono text-xs">
                         <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
                             <span class="text-slate-500 text-[10px] block mb-0.5">OCCLUSION CONFIDENCE</span>
@@ -316,20 +321,57 @@
                             <span id="mask-compliance-rate" class="text-emerald-400 font-bold text-sm">100% PASS</span>
                         </div>
                     </div>
-
                 </div>
                 {% endif %}
 
-                <!-- 8. P08: Drowsiness Face Detection -->
+                <!-- 8. P08: Advanced Driver Drowsiness Alarm & Vigilance System -->
                 {% if 'p08' in project.id %}
-                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Driver Vigilance Monitor</h4>
-                        <span id="ear-metric" class="font-mono text-xs text-cyan-400">EAR: 0.32 (Active)</span>
+                <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
+                    
+                    <!-- Top Status Strip -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                        <div>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Driver Eye Aspect Ratio (EAR) Telemetry</h4>
+                            <p class="text-xs text-slate-500">Continuous eye closure duration monitoring with dual-tone siren alarm.</p>
+                        </div>
+                        <div id="drowsy-alarm-badge" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span id="drowsy-alarm-text">ALARM: ARMED 🟢</span>
+                        </div>
                     </div>
-                    <div id="drowsy-banner" class="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center font-mono text-emerald-400 font-bold text-sm">
-                        🟢 DRIVER ATTENTIVE: EYE ASPECT RATIO OPTIMAL
+
+                    <!-- Main Dynamic Drowsiness Banner -->
+                    <div id="drowsy-main-banner" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm transition-all duration-150">
+                        🟢 DRIVER ATTENTIVE &bull; EYES OPEN &amp; FOCUSED (EAR NORMAL)
                     </div>
+
+                    <!-- Closed Eyes Duration Bar -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between font-mono text-[11px] text-slate-400">
+                            <span>Closed Eyes Duration (Alarm triggers at 1.5s):</span>
+                            <span id="drowsy-timer-text" class="text-emerald-400 font-bold">0.0s / 1.5s</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                            <div id="drowsy-progress-bar" class="bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 h-full rounded-full transition-all duration-75" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-3 gap-3 text-center font-mono text-xs">
+                        <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+                            <span class="text-slate-500 text-[10px] block mb-0.5">EYE ASPECT RATIO (EAR)</span>
+                            <span id="ear-metric-val" class="text-cyan-400 font-bold text-sm">0.315</span>
+                        </div>
+                        <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+                            <span class="text-slate-500 text-[10px] block mb-0.5">ALARM SIREN</span>
+                            <span id="siren-state-val" class="text-slate-500 font-bold text-sm">STANDBY 🔈</span>
+                        </div>
+                        <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+                            <span class="text-slate-500 text-[10px] block mb-0.5">INCIDENT COUNTER</span>
+                            <span id="drowsy-incident-count" class="text-amber-400 font-bold text-sm">0 EVENTS</span>
+                        </div>
+                    </div>
+
                 </div>
                 {% endif %}
 
@@ -437,10 +479,9 @@
                         <span>💡</span> GUIDE
                     </h3>
                     <div class="text-xs text-slate-400 leading-relaxed font-sans">
-                        {% if 'p07' in project.id %}
-                        • <strong>Live Occlusion Scan:</strong> The AI vision model performs continuous landmark analysis over the nose bridge, mouth, and chin contours.<br><br>
-                        • <strong>Mask Detected:</strong> Displays emerald verification bounding box, grants security access, and announces compliance confirmation.<br><br>
-                        • <strong>No Mask:</strong> Triggers safety violation alert, locks barrier gate, and sounds vocal mask reminder.
+                        {% if 'p08' in project.id %}
+                        • <strong>Eye Aspect Ratio (EAR):</strong> Real-time tracking calculates the vertical openness of both eyes.<br><br>
+                        • <strong>Emergency Alarm Trigger:</strong> If both eyes remain closed for longer than <strong>1.5 seconds</strong>, the system activates an emergency siren, screen strobe, and loud voice alert until eyes reopen.
                         {% else %}
                         {{ project.desc }}
                         {% endif %}
@@ -468,6 +509,7 @@
         const toast = document.getElementById('toast-modal');
         const toastText = document.getElementById('toast-text');
         const screenDimmer = document.getElementById('screen-dimmer');
+        const drowsyStrobe = document.getElementById('drowsy-strobe');
 
         let lastX = window.innerWidth / 2;
         let lastY = window.innerHeight / 2;
@@ -490,11 +532,132 @@
             } catch (e) {}
         }
 
-        // P07: Face Mask Compliance Engine State
-        let lastMaskState = null;
-        let maskDebounceTime = 0;
-        let totalScans = 0;
-        let maskPassCount = 0;
+        // P08: Drowsiness Siren Generator
+        let sirenAudioCtx = null, sirenOsc = null, sirenGain = null;
+        let sirenInterval = null;
+        let isSirenActive = false;
+
+        function startDrowsinessSiren() {
+            if (!isSirenActive) {
+                isSirenActive = true;
+                sirenAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                sirenOsc = sirenAudioCtx.createOscillator();
+                sirenGain = sirenAudioCtx.createGain();
+
+                sirenOsc.type = 'sawtooth';
+                sirenOsc.frequency.setValueAtTime(800, sirenAudioCtx.currentTime);
+                sirenGain.gain.setValueAtTime(0.25, sirenAudioCtx.currentTime);
+
+                sirenOsc.connect(sirenGain);
+                sirenGain.connect(sirenAudioCtx.destination);
+                sirenOsc.start();
+
+                // Pulsing Siren pitch (800Hz <-> 450Hz)
+                let high = true;
+                sirenInterval = setInterval(() => {
+                    if (sirenAudioCtx && sirenOsc) {
+                        sirenOsc.frequency.setValueAtTime(high ? 800 : 450, sirenAudioCtx.currentTime);
+                        high = !high;
+                    }
+                }, 180);
+            }
+        }
+
+        function stopDrowsinessSiren() {
+            if (isSirenActive) {
+                isSirenActive = false;
+                if (sirenInterval) clearInterval(sirenInterval);
+                if (sirenOsc) {
+                    try { sirenOsc.stop(); sirenOsc.disconnect(); } catch (e) {}
+                }
+                if (sirenAudioCtx) {
+                    try { sirenAudioCtx.close(); } catch (e) {}
+                }
+                sirenAudioCtx = null;
+                sirenOsc = null;
+            }
+        }
+
+        // P08 Drowsiness State Machine
+        let eyesClosedStartTime = null;
+        let drowsinessAlertTriggered = false;
+        let drowsyIncidentTotal = 0;
+
+        function handleDrowsinessAlert(eyesClosedDuration, isEyesClosed, avgEyeDist) {
+            const banner = document.getElementById('drowsy-main-banner');
+            const timerText = document.getElementById('drowsy-timer-text');
+            const pBar = document.getElementById('drowsy-progress-bar');
+            const earVal = document.getElementById('ear-metric-val');
+            const sirenVal = document.getElementById('siren-state-val');
+            const incidentEl = document.getElementById('drowsy-incident-count');
+            const badge = document.getElementById('drowsy-alarm-badge');
+            const badgeText = document.getElementById('drowsy-alarm-text');
+
+            if (earVal) earVal.innerText = avgEyeDist.toFixed(3);
+
+            if (isEyesClosed) {
+                const sec = (eyesClosedDuration / 1000).toFixed(1);
+                const pct = Math.min(100, (eyesClosedDuration / 1500) * 100);
+                if (timerText) timerText.innerText = `${sec}s / 1.5s`;
+                if (pBar) pBar.style.width = `${pct}%`;
+
+                // 1.5s Closed Eyes Threshold Reached -> FIRE EMERGENCY ALARM!
+                if (eyesClosedDuration >= 1500) {
+                    if (!drowsinessAlertTriggered) {
+                        drowsinessAlertTriggered = true;
+                        drowsyIncidentTotal++;
+                        if (incidentEl) incidentEl.innerText = `${drowsyIncidentTotal} EVENTS`;
+                        startDrowsinessSiren();
+
+                        if ('speechSynthesis' in window) {
+                            window.speechSynthesis.cancel();
+                            const u = new SpeechSynthesisUtterance("Wake up! Driver drowsiness detected! Pull over immediately!");
+                            u.rate = 1.1;
+                            u.pitch = 1.2;
+                            window.speechSynthesis.speak(u);
+                        }
+                    }
+
+                    if (banner) {
+                        banner.className = "p-4 rounded-xl bg-red-600/30 border border-red-500 text-red-300 text-center font-mono font-bold text-sm animate-pulse transition-all duration-75";
+                        banner.innerHTML = "🚨 EMERGENCY: PROLONGED EYE CLOSURE DETECTED &bull; WAKE UP!";
+                    }
+                    if (sirenVal) {
+                        sirenVal.className = "text-red-400 font-bold text-sm animate-bounce";
+                        sirenVal.innerText = "ALARM ACTIVE 🔊";
+                    }
+                    if (badge) badge.className = "px-3.5 py-1.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2";
+                    if (badgeText) badgeText.innerText = "ALARM: TRIGGERED 🔴";
+                    if (drowsyStrobe) drowsyStrobe.style.display = "block";
+                    document.getElementById('tel-log').innerText = "EMERGENCY: DROWSINESS ALARM ACTIVE";
+                }
+            } else {
+                // Eyes Reopened -> Reset & Silence Alarm
+                if (drowsinessAlertTriggered) {
+                    drowsinessAlertTriggered = false;
+                    stopDrowsinessSiren();
+                    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                }
+
+                if (timerText) timerText.innerText = "0.0s / 1.5s";
+                if (pBar) pBar.style.width = "0%";
+                if (banner) {
+                    banner.className = "p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center font-mono font-bold text-sm transition-all duration-150";
+                    banner.innerHTML = "🟢 DRIVER ATTENTIVE &bull; EYES OPEN &amp; FOCUSED (EAR NORMAL)";
+                }
+                if (sirenVal) {
+                    sirenVal.className = "text-slate-500 font-bold text-sm";
+                    sirenVal.innerText = "STANDBY 🔈";
+                }
+                if (badge) badge.className = "px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2";
+                if (badgeText) badgeText.innerText = "ALARM: ARMED 🟢";
+                if (drowsyStrobe) drowsyStrobe.style.display = "none";
+                document.getElementById('tel-log').innerText = "Vigilance Optimal (Eyes Open)";
+            }
+        }
+
+        // P07: Face Mask Compliance State
+        let lastMaskState = null, maskDebounceTime = 0, totalScans = 0, maskPassCount = 0;
 
         function handleMaskComplianceState(isMasked, confidencePct) {
             const banner = document.getElementById('mask-main-banner');
@@ -751,7 +914,7 @@
             }
         }
 
-        // FaceMesh Execution Pipeline (P06, P07, P08)
+        // FaceMesh Pipeline (P06, P07, P08)
         function onFaceResults(results) {
             loading.style.display = 'none';
             ctx.save();
@@ -762,7 +925,6 @@
                 document.getElementById('tel-status').innerText = 'Face Locked';
                 const face = results.multiFaceLandmarks[0];
 
-                // Bounding Box calculation
                 let minX = 1, maxX = 0, minY = 1, maxY = 0;
                 face.forEach(pt => {
                     if (pt.x < minX) minX = pt.x;
@@ -776,44 +938,65 @@
                 const boxW = (maxX - minX) * canvas.width;
                 const boxH = (maxY - minY) * canvas.height;
 
-                // Eye Aspect Ratio (EAR)
+                // Accurate Eye Aspect Ratio (EAR)
                 const leftEyeDist = Math.hypot(face[159].x - face[145].x, face[159].y - face[145].y);
                 const rightEyeDist = Math.hypot(face[386].x - face[374].x, face[386].y - face[374].y);
                 const avgEyeDist = (leftEyeDist + rightEyeDist) / 2;
 
-                // 7. P07: Face Mask Detection Logic (Lower-Face Occlusion Analysis)
+                // 8. P08: Drowsiness Alarm & Duration Engine
+                if (projectId.includes('p08')) {
+                    const isClosed = avgEyeDist < 0.015;
+
+                    if (isClosed) {
+                        if (!eyesClosedStartTime) {
+                            eyesClosedStartTime = Date.now();
+                        }
+                        const duration = Date.now() - eyesClosedStartTime;
+                        handleDrowsinessAlert(duration, true, avgEyeDist);
+
+                        // HUD Red Outline on Face
+                        ctx.strokeStyle = '#ef4444';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(boxX, boxY, boxW, boxH);
+                        ctx.fillStyle = '#ef4444';
+                        ctx.font = 'bold 14px JetBrains Mono, monospace';
+                        ctx.fillText(`EYES CLOSED [${(duration/1000).toFixed(1)}s]`, boxX + 6, boxY - 10);
+                    } else {
+                        eyesClosedStartTime = null;
+                        handleDrowsinessAlert(0, false, avgEyeDist);
+
+                        // HUD Normal Green Outline
+                        ctx.strokeStyle = '#10b981';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(boxX, boxY, boxW, boxH);
+                        ctx.fillStyle = '#10b981';
+                        ctx.font = '13px JetBrains Mono, monospace';
+                        ctx.fillText("VIGILANCE: NORMAL", boxX + 6, boxY - 10);
+                    }
+                }
+
+                // 7. P07: Mask Detection
                 if (projectId.includes('p07')) {
-                    // Lower face landmarks: Nose tip (1), Upper Lip (13), Lower Lip (14), Chin (152), Left Jaw (234), Right Jaw (454)
                     const noseToChin = Math.hypot(face[1].x - face[152].x, face[1].y - face[152].y);
                     const lipSeparation = Math.hypot(face[13].x - face[14].x, face[13].y - face[14].y);
                     const totalFaceHeight = maxY - minY;
 
-                    // Occlusion analysis: When mask covers lower face, relative lip landmark variance drops below threshold
                     const normalizedLipRatio = lipSeparation / totalFaceHeight;
                     const isMaskDetected = (normalizedLipRatio < 0.038 || noseToChin / totalFaceHeight < 0.32);
                     const confidence = isMaskDetected ? Math.min(99, Math.round(92 + Math.random() * 6)) : Math.min(99, Math.round(94 + Math.random() * 5));
 
-                    // HUD Bounding Box Rendering
                     ctx.strokeStyle = isMaskDetected ? '#10b981' : '#ef4444';
                     ctx.lineWidth = 3;
                     ctx.strokeRect(boxX, boxY, boxW, boxH);
 
-                    // Corner HUD Brackets
-                    ctx.fillStyle = isMaskDetected ? '#10b981' : '#ef4444';
-                    ctx.fillRect(boxX - 2, boxY - 2, 14, 4);
-                    ctx.fillRect(boxX - 2, boxY - 2, 4, 14);
-                    ctx.fillRect(boxX + boxW - 12, boxY - 2, 14, 4);
-                    ctx.fillRect(boxX + boxW - 2, boxY - 2, 4, 14);
-
-                    // Overlay Label
                     ctx.font = 'bold 13px JetBrains Mono, monospace';
+                    ctx.fillStyle = isMaskDetected ? '#10b981' : '#ef4444';
                     ctx.fillText(isMaskDetected ? "● MASK VERIFIED [ACCESS GRANTED]" : "▲ WARNING: NO MASK [DENIED]", boxX + 6, boxY - 10);
 
-                    // Update UI Dashboard
                     handleMaskComplianceState(isMaskDetected, confidence);
                 }
 
-                // 6. P06: Attendance System Logic
+                // 6. P06: Attendance Logic
                 if (projectId.includes('p06')) {
                     ctx.strokeStyle = blinkCount >= 2 ? '#10b981' : '#06b6d4';
                     ctx.lineWidth = 2;
@@ -851,26 +1034,12 @@
                     }
                 }
 
-                // 8. P08: Drowsiness Detection Logic
-                if (projectId.includes('p08')) {
-                    const earMetric = document.getElementById('ear-metric');
-                    const drowsyBanner = document.getElementById('drowsy-banner');
-                    if (earMetric) earMetric.innerText = `EAR: ${avgEyeDist.toFixed(3)}`;
-                    if (avgEyeDist < 0.014) {
-                        if (drowsyBanner) {
-                            drowsyBanner.className = "p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-center font-mono text-red-400 font-bold text-sm animate-pulse";
-                            drowsyBanner.innerText = "🚨 DROWSINESS WARNING: EYES CLOSED DETECTED!";
-                        }
-                    } else {
-                        if (drowsyBanner) {
-                            drowsyBanner.className = "p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center font-mono text-emerald-400 font-bold text-sm";
-                            drowsyBanner.innerText = "🟢 DRIVER ATTENTIVE: EYE ASPECT RATIO OPTIMAL";
-                        }
-                    }
-                }
-
             } else {
                 document.getElementById('tel-status').innerText = 'Scanning';
+                if (projectId.includes('p08')) {
+                    eyesClosedStartTime = null;
+                    handleDrowsinessAlert(0, false, 0.3);
+                }
             }
             ctx.restore();
         }
