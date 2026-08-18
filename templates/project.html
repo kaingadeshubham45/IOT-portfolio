@@ -3,284 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} - Live Web Vision</title>
+    <title>{{ project.title }} - Direct Vision</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        #webcam-video { display: none; }
-        #webcam-canvas { transform: scaleX(-1); }
-        
-        /* Floating In-Page Virtual Cursor */
+        #cam-video { display: none; }
+        #cam-canvas { transform: scaleX(-1); }
         #virtual-cursor {
             position: fixed;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
-            background: rgba(6, 182, 212, 0.7);
+            background: rgba(6, 182, 212, 0.9);
             border: 2px solid #38bdf8;
-            box-shadow: 0 0 15px #38bdf8, 0 0 30px rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 15px #38bdf8;
             pointer-events: none;
             z-index: 9999;
             transform: translate(-50%, -50%);
-            transition: width 0.1s, height 0.1s, background-color 0.1s;
             display: none;
+            transition: transform 0.05s ease-out;
         }
         #virtual-cursor.clicking {
             width: 32px;
             height: 32px;
             background: rgba(34, 197, 94, 0.9);
             border-color: #4ade80;
-            box-shadow: 0 0 25px #22c55e;
-        }
-        
-        /* Click Ripple Effect */
-        .click-ripple {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            border: 2px solid #22c55e;
-            pointer-events: none;
-            z-index: 9998;
-            transform: translate(-50%, -50%);
-            animation: ripple-anim 0.5s ease-out forwards;
-        }
-        @keyframes ripple-anim {
-            0% { width: 10px; height: 10px; opacity: 1; }
-            100% { width: 60px; height: 60px; opacity: 0; }
         }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen relative select-none">
 
-    <!-- Virtual Cursor Element -->
     <div id="virtual-cursor"></div>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <a href="/" class="interactive-elem inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-6 transition-colors p-2 rounded-lg hover:bg-slate-900">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <a href="/" class="interactive-elem inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-4 transition-colors p-2 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800">
             &larr; Back to Dashboard
         </a>
 
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="text-3xl">{{ project.icon }}</span>
-                    <h1 class="text-3xl font-bold text-white">{{ project.title }}</h1>
+        <div class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">{{ project.icon }}</span>
+                <div>
+                    <h1 class="text-2xl font-bold text-white">{{ project.title }}</h1>
+                    <p class="text-xs text-slate-400">Direct Index Tracking Active</p>
                 </div>
-                <p class="text-slate-400 text-sm md:text-base">{{ project.desc }}</p>
             </div>
-            <div id="connection-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider w-fit">
-                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                <span id="badge-status">Interactive Vision Ready</span>
+            <div class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+                ● Camera Live
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Camera & Canvas View -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-4">
-                <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
-                    <video id="webcam-video" playsinline autoplay></video>
-                    <canvas id="webcam-canvas" class="w-full h-full object-cover"></canvas>
-                    
-                    <div id="start-screen" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-4 p-6 text-center z-20">
-                        <div class="text-5xl animate-bounce">{{ project.icon }}</div>
-                        <h3 class="text-xl font-bold text-white">Start Interactive Session</h3>
-                        <p class="text-xs text-slate-400 max-w-sm">
-                            Click start to enable your camera. You will be able to move an interactive virtual cursor or adjust audio directly inside this page using hand gestures.
-                        </p>
-                        <button onclick="startVisionApp()" class="interactive-elem px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition-all shadow-lg shadow-cyan-600/30 active:scale-95">
-                            Launch Hand Tracking
-                        </button>
+                <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-xl">
+                    <video id="cam-video" playsinline autoplay></video>
+                    <canvas id="cam-canvas" class="w-full h-full object-cover"></canvas>
+                    <div id="cam-loading" class="absolute inset-0 bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
+                        Starting Camera...
                     </div>
                 </div>
 
-                <!-- Interactive Test Playground inside the page -->
-                <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
-                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Interactive Test Buttons (Hover/Click with Gesture)</div>
+                <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Hover Targets (0.5s Auto Click)</div>
                     <div class="grid grid-cols-3 gap-3">
-                        <button onclick="triggerFeedback('Button Alpha Clicked')" class="interactive-elem p-3 rounded-xl bg-slate-800/80 hover:bg-cyan-600/30 border border-slate-700/60 text-xs font-medium transition-all text-center">
-                            🔘 Target A
+                        <button onclick="logAction('Target Alpha Triggered')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-cyan-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
+                            Target A
                         </button>
-                        <button onclick="triggerFeedback('Button Beta Clicked')" class="interactive-elem p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-600/30 border border-slate-700/60 text-xs font-medium transition-all text-center">
-                            🔘 Target B
+                        <button onclick="logAction('Target Beta Triggered')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-emerald-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
+                            Target B
                         </button>
-                        <button onclick="triggerFeedback('Button Gamma Clicked')" class="interactive-elem p-3 rounded-xl bg-slate-800/80 hover:bg-purple-600/30 border border-slate-700/60 text-xs font-medium transition-all text-center">
-                            🔘 Target C
+                        <button onclick="logAction('Target Gamma Triggered')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-purple-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
+                            Target C
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Telemetry & Gesture Guide -->
-            <div class="space-y-6">
-                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
-                    <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
-                        <span>⚡</span> Live Vision Telemetry
-                    </h3>
-                    <div class="space-y-3 font-mono text-sm bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 text-emerald-400">
-                        <div>Tracking: <span id="tel-status" class="text-cyan-400">Standby</span></div>
-                        <div>Action: <span id="tel-action" class="text-yellow-400">None</span></div>
-                        <div>Cursor Pos: <span id="tel-pos" class="text-white">Idle</span></div>
-                        <div>Event Log: <span id="tel-log" class="text-emerald-300">Ready</span></div>
+            <div class="space-y-4">
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+                    <h3 class="text-sm font-semibold text-white mb-3">⚡ Live Telemetry</h3>
+                    <div class="space-y-2.5 font-mono text-xs bg-slate-950/70 p-3.5 rounded-lg border border-slate-800 text-emerald-400">
+                        <div>Point: <span class="text-cyan-400">Index Tip (Landmark 8)</span></div>
+                        <div>Coords: <span id="tel-pos" class="text-white">--</span></div>
+                        <div>Status: <span id="tel-status" class="text-yellow-400">Scanning</span></div>
+                        <div>Log: <span id="tel-log" class="text-emerald-300">Ready</span></div>
                     </div>
                 </div>
 
-                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
-                    <h3 class="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                        <span>💡</span> Gesture Controls
-                    </h3>
-                    <p class="text-xs text-slate-400 leading-relaxed space-y-2">
-                        • <strong>Move Cursor:</strong> Point index finger up to navigate the glowing cursor.<br><br>
-                        • <strong>Click / Select:</strong> Pinch index &amp; thumb together (or hover over any button for 0.8s) to trigger an on-screen click.<br><br>
-                        • <strong>Volume / Synth:</strong> Pinching adjusts dynamic visual output and in-browser audio tone.
-                    </p>
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+                    <h3 class="text-sm font-semibold text-white mb-2">🔊 Direct Signal Meter</h3>
+                    <div class="w-full bg-slate-950 h-6 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                        <div id="volume-meter" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full transition-all duration-75" style="width: 50%;"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const videoElement = document.getElementById('webcam-video');
-        const canvasElement = document.getElementById('webcam-canvas');
-        const canvasCtx = canvasElement.getContext('2d');
-        const startScreen = document.getElementById('start-screen');
+        const video = document.getElementById('cam-video');
+        const canvas = document.getElementById('cam-canvas');
+        const ctx = canvas.getContext('2d');
         const cursor = document.getElementById('virtual-cursor');
-        
+        const loading = document.getElementById('cam-loading');
+        const volMeter = document.getElementById('volume-meter');
+
         let lastX = window.innerWidth / 2;
         let lastY = window.innerHeight / 2;
-        let isClicking = false;
-        let hoverTimer = null;
-        let lastHoverElem = null;
+        let hoverStart = null;
+        let currentHovered = null;
 
-        // Web Audio Synth for Volume / Demo feedback
-        let audioCtx = null;
-        let osc = null;
-        let gainNode = null;
-
-        function initAudio() {
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                osc = audioCtx.createOscillator();
-                gainNode = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                osc.start();
-            } catch(e) {}
-        }
-
-        function triggerFeedback(msg) {
+        function logAction(msg) {
             document.getElementById('tel-log').innerText = msg;
-            if (gainNode && audioCtx) {
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-            }
-        }
-
-        function createRipple(x, y) {
-            const ripple = document.createElement('div');
-            ripple.className = 'click-ripple';
-            ripple.style.left = `${x}px`;
-            ripple.style.top = `${y}px`;
-            document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 500);
-        }
-
-        function performVirtualClick(x, y) {
-            cursor.classList.add('clicking');
-            createRipple(x, y);
-            
-            const elem = document.elementFromPoint(x, y);
-            if (elem) {
-                const clickable = elem.closest('button, a, .interactive-elem');
-                if (clickable) {
-                    clickable.click();
-                    clickable.classList.add('ring-2', 'ring-cyan-400');
-                    setTimeout(() => clickable.classList.remove('ring-2', 'ring-cyan-400'), 300);
-                }
-            }
-
-            setTimeout(() => {
-                cursor.classList.remove('clicking');
-            }, 250);
         }
 
         function onResults(results) {
-            canvasCtx.save();
-            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+            loading.style.display = 'none';
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 cursor.style.display = 'block';
-                document.getElementById('tel-status').innerText = 'Hand Active';
+                document.getElementById('tel-status').innerText = 'Index Locked';
 
-                for (const landmarks of results.multiHandLandmarks) {
-                    // Draw Hand Skeleton
-                    for (let i = 0; i < landmarks.length; i++) {
-                        const px = landmarks[i].x * canvasElement.width;
-                        const py = landmarks[i].y * canvasElement.height;
-                        canvasCtx.beginPath();
-                        canvasCtx.arc(px, py, 3, 0, 2 * Math.PI);
-                        canvasCtx.fillStyle = '#06b6d4';
-                        canvasCtx.fill();
+                const idx = results.multiHandLandmarks[0][8];
+
+                const px = idx.x * canvas.width;
+                const py = idx.y * canvas.height;
+                ctx.beginPath();
+                ctx.arc(px, py, 8, 0, 2 * Math.PI);
+                ctx.fillStyle = '#06b6d4';
+                ctx.fill();
+
+                const targetX = (1.0 - idx.x) * window.innerWidth;
+                const targetY = idx.y * window.innerHeight;
+                lastX += (targetX - lastX) * 0.6;
+                lastY += (targetY - lastY) * 0.6;
+
+                cursor.style.left = lastX + 'px';
+                cursor.style.top = lastY + 'px';
+                document.getElementById('tel-pos').innerText = Math.round(lastX) + ', ' + Math.round(lastY);
+
+                const val = Math.min(100, Math.max(0, Math.round((1.0 - idx.y) * 100)));
+                volMeter.style.width = val + '%';
+
+                const elem = document.elementFromPoint(lastX, lastY);
+                const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
+
+                if (clickable) {
+                    if (currentHovered !== clickable) {
+                        currentHovered = clickable;
+                        hoverStart = Date.now();
+                    } else if (Date.now() - hoverStart >= 500) {
+                        cursor.classList.add('clicking');
+                        clickable.click();
+                        setTimeout(() => cursor.classList.remove('clicking'), 250);
+                        hoverStart = Date.now() + 1000;
                     }
-
-                    // Inverted X for mirror canvas mapping
-                    const rawX = (1.0 - landmarks[8].x);
-                    const rawY = landmarks[8].y;
-
-                    // Smooth cursor coordinates
-                    const targetX = rawX * window.innerWidth;
-                    const targetY = rawY * window.innerHeight;
-                    lastX += (targetX - lastX) * 0.4;
-                    lastY += (targetY - lastY) * 0.4;
-
-                    cursor.style.left = `${lastX}px`;
-                    cursor.style.top = `${lastY}px`;
-                    document.getElementById('tel-pos').innerText = `(${Math.round(lastX)}, ${Math.round(lastY)})`;
-
-                    // Pinch Click Detection (Index 8 & Thumb 4)
-                    const thumbX = (1.0 - landmarks[4].x) * window.innerWidth;
-                    const thumbY = landmarks[4].y * window.innerHeight;
-                    const pinchDist = Math.hypot(lastX - thumbX, lastY - thumbY);
-
-                    // Dynamic Tone modulation for P02 Volume simulation
-                    if (gainNode && audioCtx) {
-                        const volPct = Math.min(1.0, Math.max(0.0, (pinchDist - 40) / 160));
-                        osc.frequency.setValueAtTime(300 + (volPct * 400), audioCtx.currentTime);
-                    }
-
-                    if (pinchDist < 50) {
-                        if (!isClicking) {
-                            isClicking = true;
-                            document.getElementById('tel-action').innerText = 'Pinch Click!';
-                            performVirtualClick(lastX, lastY);
-                        }
-                    } else {
-                        isClicking = false;
-                        document.getElementById('tel-action').innerText = 'Moving Cursor';
-                    }
+                } else {
+                    currentHovered = null;
+                    hoverStart = null;
                 }
             } else {
                 cursor.style.display = 'none';
-                document.getElementById('tel-status').innerText = 'Searching Hand';
-                document.getElementById('tel-action').innerText = 'Idle';
+                document.getElementById('tel-status').innerText = 'Scanning for Finger';
             }
-            canvasCtx.restore();
+            ctx.restore();
         }
 
-        async function startVisionApp() {
-            startScreen.style.display = 'none';
-            initAudio();
-            document.getElementById('badge-status').innerText = 'Vision Engine Active';
-
-            canvasElement.width = 640;
-            canvasElement.height = 480;
+        window.addEventListener('DOMContentLoaded', () => {
+            canvas.width = 640;
+            canvas.height = 480;
 
             const hands = new Hands({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -288,23 +185,23 @@
 
             hands.setOptions({
                 maxNumHands: 1,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.6,
-                minTrackingConfidence: 0.6
+                modelComplexity: 0,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
             });
 
             hands.onResults(onResults);
 
-            const camera = new Camera(videoElement, {
+            const camera = new Camera(video, {
                 onFrame: async () => {
-                    await hands.send({ image: videoElement });
+                    await hands.send({ image: video });
                 },
                 width: 640,
                 height: 480
             });
 
             camera.start();
-        }
+        });
     </script>
 </body>
 </html>
