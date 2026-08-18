@@ -3,20 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} - AI &amp; IoT Hub</title>
+    <title>{{ project.title }} | AI &amp; IoT Edge Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 100%);
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
         #cam-video { display: none; }
         #cam-canvas { transform: scaleX(-1); }
         
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+        
         .v-cursor {
             position: fixed;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             pointer-events: none;
             z-index: 9999;
@@ -25,72 +35,97 @@
             transition: transform 0.05s ease-out;
         }
         #cursor-right {
-            background: rgba(6, 182, 212, 0.9);
+            background: rgba(6, 182, 212, 0.85);
             border: 2px solid #38bdf8;
-            box-shadow: 0 0 15px #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
         }
         #cursor-left {
-            background: rgba(245, 158, 11, 0.9);
+            background: rgba(245, 158, 11, 0.85);
             border: 2px solid #fbbf24;
-            box-shadow: 0 0 15px #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
         }
         .v-cursor.clicking {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             background: rgba(34, 197, 94, 0.9) !important;
             border-color: #4ade80 !important;
-            box-shadow: 0 0 25px #22c55e !important;
+            box-shadow: 0 0 25px rgba(74, 222, 128, 0.8) !important;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen relative select-none">
+<body class="text-slate-100 min-h-screen relative select-none antialiased flex flex-col justify-between">
 
     <!-- Cursors -->
     <div id="cursor-right" class="v-cursor"></div>
     <div id="cursor-left" class="v-cursor"></div>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        <a href="/" class="interactive-elem inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-4 transition-colors p-2 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800">
-            &larr; Back to Dashboard
-        </a>
-
-        <div class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
-            <div class="flex items-center gap-3">
-                <span class="text-3xl">{{ project.icon }}</span>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        
+        <!-- Navigation & Header Bar -->
+        <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-800/80">
+            <div class="flex items-center gap-4">
+                <a href="/" class="interactive-elem flex items-center justify-center w-10 h-10 rounded-xl glass-panel text-slate-400 hover:text-white hover:border-cyan-500/50 hover:bg-slate-800 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </a>
                 <div>
-                    <h1 class="text-2xl font-bold text-white">{{ project.title }}</h1>
-                    <p class="text-xs text-slate-400">{{ project.desc }}</p>
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-2xl">{{ project.icon }}</span>
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">{{ project.title }}</h1>
+                        <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800 font-semibold uppercase tracking-wider">
+                            {{ project.id[:3].upper() }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ project.desc }}</p>
                 </div>
             </div>
-            <div class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-                ● Live Camera Vision
-            </div>
-        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Viewport -->
-            <div class="lg:col-span-2 space-y-4">
-                <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-xl">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg glass-panel border-slate-800 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="font-mono text-emerald-400 font-medium">CAMERA READY</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Vision Panel (8 Cols) -->
+            <div class="lg:col-span-8 space-y-4">
+                <div class="relative glass-panel rounded-2xl overflow-hidden aspect-video border border-slate-800 shadow-2xl flex items-center justify-center">
+                    <!-- Corner HUD Brackets -->
+                    <div class="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-cyan-500/50 pointer-events-none"></div>
+                    <div class="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-cyan-500/50 pointer-events-none"></div>
+                    <div class="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-cyan-500/50 pointer-events-none"></div>
+                    <div class="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-cyan-500/50 pointer-events-none"></div>
+                    
                     <video id="cam-video" playsinline autoplay></video>
                     <canvas id="cam-canvas" class="w-full h-full object-cover"></canvas>
-                    <div id="cam-loading" class="absolute inset-0 bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
-                        Initializing Camera Stream...
+                    
+                    <div id="cam-loading" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-3 text-slate-400 text-xs font-mono">
+                        <div class="w-7 h-7 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span>INITIALIZING VISION ENGINE...</span>
                     </div>
                 </div>
 
+                <!-- Project-Specific Action Workspaces -->
+                
                 <!-- P01: Virtual Mouse -->
                 {% if 'mouse' in project.id %}
-                <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
-                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Action Targets (Hover 0.5s to trigger)</div>
+                <div class="glass-panel rounded-xl p-4 border-slate-800">
+                    <div class="text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-3">Interactive Targets (Hover 0.5s)</div>
                     <div class="grid grid-cols-3 gap-3">
-                        <button onclick="handleTargetClick('Good Morning! Target 1 has been activated successfully.', 'Target 1: Good Morning! ☀️')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-cyan-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
-                            ☀️ Say "Good Morning"
+                        <button onclick="handleTargetClick('Good Morning! Target 1 has been activated successfully.', 'Target 1: Good Morning! ☀️')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-cyan-950/40 border border-slate-800 hover:border-cyan-500/50 text-xs font-medium transition-all text-center group">
+                            <span class="block text-base mb-1">☀️</span>
+                            <span class="text-slate-200 group-hover:text-cyan-400">Good Morning</span>
                         </button>
-                        <button onclick="handleTargetClick('IoT Relay Channel 1 Toggled ON.', 'Target 2: Relay Toggled ⚡')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-emerald-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
-                            ⚡ Trigger IoT Relay
+                        <button onclick="handleTargetClick('IoT Relay Channel 1 Toggled ON.', 'Target 2: Relay Toggled ⚡')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-emerald-950/40 border border-slate-800 hover:border-emerald-500/50 text-xs font-medium transition-all text-center group">
+                            <span class="block text-base mb-1">⚡</span>
+                            <span class="text-slate-200 group-hover:text-emerald-400">Toggle Relay</span>
                         </button>
-                        <button onclick="handleTargetClick('Snapshot Captured and Saved to Storage.', 'Target 3: Snapshot Saved 📸')" class="interactive-elem p-3 rounded-lg bg-slate-800 hover:bg-purple-600/30 border border-slate-700 text-xs font-medium text-center transition-all">
-                            📸 Capture Snapshot
+                        <button onclick="handleTargetClick('Snapshot Captured and Saved to Storage.', 'Target 3: Snapshot Saved 📸')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-purple-950/40 border border-slate-800 hover:border-purple-500/50 text-xs font-medium transition-all text-center group">
+                            <span class="block text-base mb-1">📸</span>
+                            <span class="text-slate-200 group-hover:text-purple-400">Capture Frame</span>
                         </button>
                     </div>
                 </div>
@@ -98,117 +133,151 @@
 
                 <!-- P02: Virtual Volume -->
                 {% if 'volume' in project.id %}
-                <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
+                <div class="glass-panel rounded-xl p-5 border-slate-800">
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h4 class="text-sm font-semibold text-white">Audio Synthesis Output</h4>
-                            <p class="text-xs text-slate-400">Exponential logarithmic gain (Full silence at bottom).</p>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Output Gain Synthesis</h4>
+                            <p class="text-xs text-slate-500">Logarithmic elevation scaling with hard mute at bottom.</p>
                         </div>
-                        <button id="audio-toggle-btn" onclick="toggleAudioDemo()" class="text-xs px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-medium transition-all">
-                            Start Audio Test 🔊
+                        <button id="audio-toggle-btn" onclick="toggleAudioDemo()" class="interactive-elem text-xs px-3.5 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-semibold transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-900/30">
+                            <span>🔊</span>
+                            <span>Start Audio Stream</span>
                         </button>
                     </div>
-                    <div class="w-full bg-slate-950 h-8 rounded-xl overflow-hidden border border-slate-800 p-1 mb-2">
-                        <div id="volume-meter-large" class="bg-gradient-to-r from-cyan-500 via-emerald-400 to-yellow-400 h-full rounded-lg transition-all duration-75" style="width: 50%;"></div>
+                    <div class="w-full bg-slate-950 h-7 rounded-lg overflow-hidden border border-slate-800 p-1 mb-2">
+                        <div id="volume-meter-large" class="bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 h-full rounded transition-all duration-75" style="width: 50%;"></div>
                     </div>
-                    <div class="flex justify-between text-xs text-slate-400 font-mono">
-                        <span>0% (Muted)</span>
+                    <div class="flex justify-between font-mono text-[11px] text-slate-400">
+                        <span>0% (SILENCE)</span>
                         <span id="volume-pct-large" class="text-emerald-400 font-bold text-sm">50%</span>
-                        <span>100% (Max)</span>
+                        <span>100% (MAX)</span>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- P03: Virtual Keyboard (Dual Hand) -->
+                <!-- P03: Virtual Keyboard -->
                 {% if 'keyboard' in project.id %}
-                <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dual-Hand Active Buffer (Right: Cyan / Left: Amber)</div>
-                        <button onclick="clearType()" class="interactive-elem text-xs px-2.5 py-1 bg-red-900/60 hover:bg-red-600 text-red-200 rounded border border-red-800 font-mono">CLEAR</button>
+                <div class="glass-panel rounded-xl p-4 border-slate-800">
+                    <div class="flex justify-between items-center mb-2.5">
+                        <div class="text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider">Dual-Hand Active Buffer (R: Cyan / L: Amber)</div>
+                        <button onclick="clearType()" class="interactive-elem text-xs px-3 py-1 bg-red-950/60 hover:bg-red-800 text-red-300 rounded-md border border-red-800 font-mono transition-all">CLEAR</button>
                     </div>
-                    <div id="typed-text" class="w-full p-3.5 bg-slate-950 rounded-lg border border-slate-800 font-mono text-cyan-400 text-lg mb-3 min-h-[48px] flex items-center">
-                        <span class="text-slate-600">Hover any key with Left or Right index finger...</span>
+                    <div id="typed-text" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 font-mono text-cyan-400 text-base mb-3 min-h-[46px] flex items-center">
+                        <span class="text-slate-600 text-xs">Hover over letters with either index finger...</span>
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1.5 select-none">
                         <div class="grid grid-cols-10 gap-1.5 font-mono text-xs text-center font-bold">
-                            <button onclick="typeKey('Q')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">Q</button>
-                            <button onclick="typeKey('W')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">W</button>
-                            <button onclick="typeKey('E')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">E</button>
-                            <button onclick="typeKey('R')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">R</button>
-                            <button onclick="typeKey('T')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">T</button>
-                            <button onclick="typeKey('Y')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">Y</button>
-                            <button onclick="typeKey('U')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">U</button>
-                            <button onclick="typeKey('I')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">I</button>
-                            <button onclick="typeKey('O')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">O</button>
-                            <button onclick="typeKey('P')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">P</button>
+                            <button onclick="typeKey('Q')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">Q</button>
+                            <button onclick="typeKey('W')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">W</button>
+                            <button onclick="typeKey('E')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">E</button>
+                            <button onclick="typeKey('R')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">R</button>
+                            <button onclick="typeKey('T')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">T</button>
+                            <button onclick="typeKey('Y')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">Y</button>
+                            <button onclick="typeKey('U')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">U</button>
+                            <button onclick="typeKey('I')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">I</button>
+                            <button onclick="typeKey('O')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">O</button>
+                            <button onclick="typeKey('P')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">P</button>
                         </div>
                         <div class="grid grid-cols-9 gap-1.5 px-3 font-mono text-xs text-center font-bold">
-                            <button onclick="typeKey('A')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">A</button>
-                            <button onclick="typeKey('S')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">S</button>
-                            <button onclick="typeKey('D')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">D</button>
-                            <button onclick="typeKey('F')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">F</button>
-                            <button onclick="typeKey('G')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">G</button>
-                            <button onclick="typeKey('H')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">H</button>
-                            <button onclick="typeKey('J')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">J</button>
-                            <button onclick="typeKey('K')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">K</button>
-                            <button onclick="typeKey('L')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">L</button>
+                            <button onclick="typeKey('A')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">A</button>
+                            <button onclick="typeKey('S')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">S</button>
+                            <button onclick="typeKey('D')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">D</button>
+                            <button onclick="typeKey('F')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">F</button>
+                            <button onclick="typeKey('G')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">G</button>
+                            <button onclick="typeKey('H')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">H</button>
+                            <button onclick="typeKey('J')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">J</button>
+                            <button onclick="typeKey('K')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">K</button>
+                            <button onclick="typeKey('L')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">L</button>
                         </div>
                         <div class="grid grid-cols-7 gap-1.5 px-8 font-mono text-xs text-center font-bold">
-                            <button onclick="typeKey('Z')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">Z</button>
-                            <button onclick="typeKey('X')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">X</button>
-                            <button onclick="typeKey('C')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">C</button>
-                            <button onclick="typeKey('V')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">V</button>
-                            <button onclick="typeKey('B')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">B</button>
-                            <button onclick="typeKey('N')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">N</button>
-                            <button onclick="typeKey('M')" class="interactive-elem p-2.5 bg-slate-800 hover:bg-cyan-600/40 rounded border border-slate-700">M</button>
+                            <button onclick="typeKey('Z')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">Z</button>
+                            <button onclick="typeKey('X')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">X</button>
+                            <button onclick="typeKey('C')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">C</button>
+                            <button onclick="typeKey('V')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">V</button>
+                            <button onclick="typeKey('B')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">B</button>
+                            <button onclick="typeKey('N')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">N</button>
+                            <button onclick="typeKey('M')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">M</button>
                         </div>
                         <div class="grid grid-cols-4 gap-2 pt-1">
-                            <button onclick="typeKey(' ')" class="interactive-elem col-span-3 p-2.5 bg-slate-800 hover:bg-emerald-600/40 rounded border border-slate-700 font-mono text-xs font-bold text-center">SPACE BAR</button>
-                            <button onclick="backspaceType()" class="interactive-elem p-2.5 bg-slate-800 hover:bg-red-600/40 rounded border border-slate-700 font-mono text-xs font-bold text-center">⌫ BACK</button>
+                            <button onclick="typeKey(' ')" class="interactive-elem col-span-3 p-2.5 bg-slate-900/90 hover:bg-emerald-950/40 rounded-lg border border-slate-800 hover:border-emerald-500/50 font-mono text-xs font-bold text-center transition-all">SPACE</button>
+                            <button onclick="backspaceType()" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-red-950/40 rounded-lg border border-slate-800 hover:border-red-500/50 font-mono text-xs font-bold text-center transition-all">⌫ DEL</button>
                         </div>
                     </div>
                 </div>
                 {% endif %}
             </div>
 
-            <!-- Telemetry Sidebar -->
-            <div class="space-y-4">
-                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
-                    <h3 class="text-sm font-semibold text-white mb-3">⚡ Real-Time Telemetry</h3>
-                    <div class="space-y-2.5 font-mono text-xs bg-slate-950/70 p-3.5 rounded-lg border border-slate-800 text-emerald-400">
-                        <div>Pipeline: <span class="text-cyan-400">{{ project.title }}</span></div>
-                        <div>Hands Active: <span id="tel-hands" class="text-white">0</span></div>
-                        <div>Output Status: <span id="tel-log" class="text-emerald-300">Ready</span></div>
+            <!-- Right Telemetry Panel (4 Cols) -->
+            <div class="lg:col-span-4 space-y-4">
+                
+                <!-- Live Telemetry Card -->
+                <div class="glass-panel rounded-2xl p-5 border-slate-800 shadow-xl">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800/80">
+                        <h3 class="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                            <span>⚡</span> LIVE TELEMETRY
+                        </h3>
+                        <span class="font-mono text-[10px] text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">60 FPS</span>
+                    </div>
+                    
+                    <div class="space-y-3 font-mono text-xs">
+                        <div class="flex justify-between items-center py-1.5 border-b border-slate-800/50">
+                            <span class="text-slate-400">Target Pipeline</span>
+                            <span class="text-white font-semibold">{{ project.id[:3].upper() }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-1.5 border-b border-slate-800/50">
+                            <span class="text-slate-400">Subject Tracking</span>
+                            <span id="tel-hands" class="text-emerald-400 font-semibold">0 Detected</span>
+                        </div>
+                        <div class="flex justify-between items-center py-1.5 border-b border-slate-800/50">
+                            <span class="text-slate-400">Engine State</span>
+                            <span id="tel-status" class="text-yellow-400">Scanning</span>
+                        </div>
+                        <div class="py-1.5">
+                            <span class="text-slate-400 block mb-1">Telemetry Log</span>
+                            <div id="tel-log" class="p-2.5 bg-slate-950 rounded-lg border border-slate-800/80 text-cyan-300 text-[11px] truncate">
+                                Engine ready for input
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
-                    <h3 class="text-sm font-semibold text-white mb-2">💡 Operational Guide</h3>
-                    {% if 'mouse' in project.id %}
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        • <strong>Move Index Finger:</strong> Steers cursor.<br>
-                        • <strong>Hover 0.5s on Target 1:</strong> Plays speech voice alert ("Good Morning").
-                    </p>
-                    {% elif 'volume' in project.id %}
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        • <strong>Raise Hand:</strong> Scales audio to <strong>100%</strong>.<br>
-                        • <strong>Lower Hand:</strong> Smoothly cuts audio down to <strong>0% (Dead Silence)</strong>.
-                    </p>
-                    {% elif 'keyboard' in project.id %}
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        • <strong>Dual Hand Support:</strong> Right (Cyan) &amp; Left (Amber).<br>
-                        • Hover either fingertip over any key for <strong>0.4s</strong> to type.
-                    </p>
-                    {% endif %}
+                <!-- Guide / System Overview -->
+                <div class="glass-panel rounded-2xl p-5 border-slate-800 shadow-xl">
+                    <h3 class="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <span>💡</span> SYSTEM INSTRUCTIONS
+                    </h3>
+                    <div class="text-xs text-slate-400 leading-relaxed space-y-2 font-sans">
+                        {% if 'mouse' in project.id %}
+                        <p>• Move your index fingertip to pilot the virtual pointer across the display.</p>
+                        <p>• Hold over any interactive target for <strong>0.5s</strong> to trigger speech synthesis and relay signals.</p>
+                        {% elif 'volume' in project.id %}
+                        <p>• Raise your hand to scale audio gain up to <strong>100%</strong>.</p>
+                        <p>• Lower your hand to the bottom region to execute a <strong>0% hard mute</strong>.</p>
+                        {% elif 'keyboard' in project.id %}
+                        <p>• Dual-Hand Mode Active: Right index (Cyan) &amp; Left index (Amber).</p>
+                        <p>• Hover either fingertip over a key for <strong>0.4s</strong> to write into the text buffer.</p>
+                        {% else %}
+                        <p>{{ project.desc }}</p>
+                        {% endif %}
+                    </div>
                 </div>
+
             </div>
-        </div>
+
+        </main>
+
+        <!-- Footer Bar -->
+        <footer class="mt-8 pt-4 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono text-slate-500">
+            <span>CLIENT-SIDE MEDIAPIPE CORE</span>
+            <span>BUILD STABLE &bull; 2026</span>
+        </footer>
+
     </div>
 
-    <!-- Voice Feedback Toast -->
-    <div id="toast-modal" class="fixed bottom-6 right-6 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-2xl font-medium text-sm transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-2">
-        <span>✨</span>
-        <span id="toast-text">Action Confirmed</span>
+    <!-- Notification Toast Modal -->
+    <div id="toast-modal" class="fixed bottom-6 right-6 glass-panel bg-emerald-950/90 border-emerald-500/50 text-emerald-300 px-5 py-3 rounded-xl shadow-2xl font-medium text-xs transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-2.5">
+        <span class="text-base">✨</span>
+        <span id="toast-text" class="font-mono">Action Confirmed</span>
     </div>
 
     <script>
@@ -245,18 +314,18 @@
         function clearType() {
             typedBuffer = "";
             renderType();
-            document.getElementById('tel-log').innerText = `Cleared Buffer`;
+            document.getElementById('tel-log').innerText = `Buffer Cleared`;
         }
         function renderType() {
             const el = document.getElementById('typed-text');
             if (el) {
                 el.innerHTML = typedBuffer 
                     ? `<span class="text-white">${typedBuffer}</span><span class="animate-pulse text-cyan-400">|</span>` 
-                    : `<span class="text-slate-600">Hover any key with Left or Right index finger...</span>`;
+                    : `<span class="text-slate-600 text-xs">Hover over letters with either index finger...</span>`;
             }
         }
 
-        // Web Audio
+        // Web Audio Synthesizer
         let audioCtx = null, osc = null, gainNode = null;
 
         function initAudioEngine() {
@@ -273,7 +342,7 @@
 
                 const btn = document.getElementById('audio-toggle-btn');
                 if (btn) {
-                    btn.innerText = 'Audio Playing 🔊';
+                    btn.innerHTML = '<span>🔊</span><span>Audio Active</span>';
                     btn.classList.replace('bg-cyan-600', 'bg-emerald-600');
                 }
             }
@@ -285,11 +354,11 @@
             } else if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
                 const btn = document.getElementById('audio-toggle-btn');
-                if (btn) btn.innerText = 'Audio Playing 🔊';
+                if (btn) btn.innerHTML = '<span>🔊</span><span>Audio Active</span>';
             } else if (audioCtx.state === 'running') {
                 audioCtx.suspend();
                 const btn = document.getElementById('audio-toggle-btn');
-                if (btn) btn.innerText = 'Audio Muted 🔇';
+                if (btn) btn.innerHTML = '<span>🔇</span><span>Audio Muted</span>';
             }
         }
 
@@ -337,12 +406,14 @@
             document.getElementById('tel-hands').innerText = `${numHands} Active`;
 
             if (numHands > 0) {
-                // Hand 1 (Right Hand)
+                document.getElementById('tel-status').innerText = 'Locked';
+
                 const lms1 = results.multiHandLandmarks[0];
                 const idx1 = lms1[8];
                 const px1 = idx1.x * canvas.width;
                 const py1 = idx1.y * canvas.height;
 
+                // Draw fingertip target marker
                 ctx.beginPath();
                 ctx.arc(px1, py1, 8, 0, 2 * Math.PI);
                 ctx.fillStyle = '#06b6d4';
@@ -363,7 +434,6 @@
                     checkHoverClick(rightX, rightY, cursorRight, rightHover);
                 }
 
-                // Hand 2 (Left Hand for Keyboard)
                 if (numHands > 1 && isKeyboardProject) {
                     const lms2 = results.multiHandLandmarks[1];
                     const idx2 = lms2[8];
@@ -391,7 +461,6 @@
                     cursorLeft.style.display = 'none';
                 }
 
-                // Volume Logarithmic Scaling
                 if (isVolumeProject) {
                     cursorRight.style.display = 'none';
                     cursorLeft.style.display = 'none';
@@ -409,11 +478,12 @@
                         gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
                         gainNode.gain.linearRampToValueAtTime(realGain, audioCtx.currentTime + 0.05);
                     }
-                    document.getElementById('tel-log').innerText = volPct === 0 ? 'Muted (Silence)' : `Volume: ${volPct}%`;
+                    document.getElementById('tel-log').innerText = volPct === 0 ? 'Muted (Silence)' : `Gain Level: ${volPct}%`;
                 }
             } else {
                 cursorRight.style.display = 'none';
                 cursorLeft.style.display = 'none';
+                document.getElementById('tel-status').innerText = 'Searching';
             }
             ctx.restore();
         }
