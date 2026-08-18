@@ -5,15 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ project.title }} - AI &amp; IoT Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- MediaPipe Hands & Camera Utils for direct browser execution -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        #webcam-canvas { transform: scaleX(-1); }
-        #webcam-video { display: none; }
-    </style>
+    <style> body { font-family: 'Inter', sans-serif; } </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -29,47 +22,39 @@
                 </div>
                 <p class="text-slate-400 text-sm md:text-base">{{ project.desc }}</p>
             </div>
-            <div id="connection-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider w-fit">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider w-fit">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="badge-status">Camera Standby</span>
+                <span>Active Edge Feed</span>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
-                <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
-                    <video id="webcam-video" playsinline autoplay></video>
-                    <canvas id="webcam-canvas" class="w-full h-full object-cover"></canvas>
-                    
-                    <div id="cam-overlay" class="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-4 p-6 text-center">
-                        <div class="text-4xl">📷</div>
-                        <p class="text-white font-semibold text-base">Enable Browser Camera</p>
-                        <p class="text-xs text-slate-400 max-w-sm">Allow camera access to run AI vision tracking directly on your laptop or phone.</p>
-                        <button onclick="startBrowserCamera()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition-all shadow-lg shadow-blue-600/30">
-                            Start Camera
-                        </button>
-                    </div>
+                <div class="relative bg-black border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
+                    <img id="live-stream-img"
+                         src="/video_feed/{{ project.id }}" 
+                         alt="Live Vision Stream" 
+                         class="w-full h-full object-contain">
                 </div>
             </div>
 
             <div class="space-y-6">
                 <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
                     <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
-                        <span>⚡</span> Live Vision Telemetry
+                        <span>⚡</span> Live Edge Telemetry
                     </h3>
                     <div id="telemetry-box" class="space-y-3 font-mono text-sm bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 text-emerald-400">
-                        <div>Tracking: <span id="tel-tracking">Waiting for input</span></div>
-                        <div>Landmarks: <span id="tel-points">0 detected</span></div>
-                        <div>Gesture Action: <span id="tel-action">Idle</span></div>
+                        <div>Tracking: Initializing...</div>
                     </div>
                 </div>
 
                 <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
                     <h3 class="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                        <span>📱</span> Multi-Platform Ready
+                        <span>💡</span> Controls Guide
                     </h3>
                     <p class="text-xs text-slate-400 leading-relaxed">
-                        This view runs native client-side computer vision. Works instantly across Chrome on Windows, macOS, Android, and iOS browsers.
+                        • <strong>Virtual Mouse:</strong> Point Index finger up to control cursor. Dwell 0.8s in place to click.<br><br>
+                        • <strong>Virtual Volume:</strong> Pinch Index &amp; Thumb closer or further apart to change Windows volume.
                     </p>
                 </div>
             </div>
@@ -77,89 +62,17 @@
     </div>
 
     <script>
-        const videoElement = document.getElementById('webcam-video');
-        const canvasElement = document.getElementById('webcam-canvas');
-        const canvasCtx = canvasElement.getContext('2d');
-        const overlay = document.getElementById('cam-overlay');
-        const badgeStatus = document.getElementById('badge-status');
-
-        let hands;
-        let camera;
-
-        function onResults(results) {
-            canvasCtx.save();
-            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-
-            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                document.getElementById('tel-tracking').innerText = 'Hand Locked';
-                document.getElementById('tel-points').innerText = `${results.multiHandLandmarks[0].length} Points`;
-
-                for (const landmarks of results.multiHandLandmarks) {
-                    for (let i = 0; i < landmarks.length; i++) {
-                        const x = landmarks[i].x * canvasElement.width;
-                        const y = landmarks[i].y * canvasElement.height;
-                        canvasCtx.beginPath();
-                        canvasCtx.arc(x, y, 4, 0, 2 * Math.PI);
-                        canvasCtx.fillStyle = '#06b6d4';
-                        canvasCtx.fill();
-                    }
-
-                    // Gesture Logic for Mouse / Volume Demo
-                    const indexTip = landmarks[8];
-                    const thumbTip = landmarks[4];
-                    const dist = Math.hypot((indexTip.x - thumbTip.x) * canvasElement.width, (indexTip.y - thumbTip.y) * canvasElement.height);
-
-                    if (dist < 40) {
-                        document.getElementById('tel-action').innerText = 'Pinch / Trigger Active';
-                        canvasCtx.beginPath();
-                        canvasCtx.moveTo(thumbTip.x * canvasElement.width, thumbTip.y * canvasElement.height);
-                        canvasCtx.lineTo(indexTip.x * canvasElement.width, indexTip.y * canvasElement.height);
-                        canvasCtx.strokeStyle = '#22c55e';
-                        canvasCtx.lineWidth = 4;
-                        canvasCtx.stroke();
-                    } else {
-                        document.getElementById('tel-action').innerText = 'Tracking Gesture';
-                    }
-                }
-            } else {
-                document.getElementById('tel-tracking').innerText = 'Searching Hand';
-                document.getElementById('tel-points').innerText = '0 detected';
-                document.getElementById('tel-action').innerText = 'Idle';
-            }
-            canvasCtx.restore();
-        }
-
-        async function startBrowserCamera() {
-            overlay.style.display = 'none';
-            badgeStatus.innerText = 'Active Stream';
-
-            canvasElement.width = 640;
-            canvasElement.height = 480;
-
-            hands = new Hands({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-            });
-
-            hands.setOptions({
-                maxNumHands: 2,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.6,
-                minTrackingConfidence: 0.6
-            });
-
-            hands.onResults(onResults);
-
-            camera = new Camera(videoElement, {
-                onFrame: async () => {
-                    await hands.send({ image: videoElement });
-                },
-                width: 640,
-                height: 480
-            });
-
-            camera.start();
-        }
+        setInterval(() => {
+            fetch('/api/state/{{ project.id }}')
+                .then(res => res.json())
+                .then(data => {
+                    const box = document.getElementById('telemetry-box');
+                    box.innerHTML = Object.entries(data)
+                        .map(([k, v]) => `<div><span class="text-slate-500">${k}:</span> ${v}</div>`)
+                        .join('');
+                })
+                .catch(() => {});
+        }, 600);
     </script>
 </body>
 </html>
