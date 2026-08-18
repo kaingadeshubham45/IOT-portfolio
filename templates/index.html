@@ -1,40 +1,55 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI & Vision IoT Command Center</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Vision & IoT Command Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body>
-    <header>
-        <div class="badge-live">
-            <div class="pulse-dot"></div>
-            Edge Vision Engine Active
-        </div>
-        <h1>Vision & IoT Command Hub</h1>
-        <p>Real-time OpenCV, MediaPipe gesture tracking, and automated IoT edge controls.</p>
-    </header>
-
-    <main class="grid-container">
-        {% for p in projects %}
-        <div class="card">
-            <div class="card-top">
-                <div class="card-icon">{{ p.icon }}</div>
-                <span class="status-indicator">READY</span>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <header class="text-center mb-16">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-4">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Edge Vision Engine Active
             </div>
-            <h2>{{ p.title }}</h2>
-            <p>{{ p.description }}</p>
-            <a href="/project/{{ p.id }}" class="btn">
-                Launch System
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
+                Vision &amp; IoT Command Hub
+            </h1>
+            <p class="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+                Real-time OpenCV, MediaPipe gesture tracking, and automated IoT edge controls.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for pid, p in projects.items() %}
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 hover:shadow-xl hover:shadow-blue-500/5 transition-all">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center text-2xl">
+                            {{ p['icon'] }}
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                            READY
+                        </span>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-2">
+                        {{ p['title'] }}
+                    </h2>
+                    <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+                        {{ p['desc'] }}
+                    </p>
+                </div>
+                <a href="/project/{{ pid }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-blue-600/20">
+                    Launch System &rarr;
+                </a>
+            </div>
+            {% endfor %}
         </div>
-        {% else %}
-        <div class="card" style="grid-column: 1 / -1; text-align: center;">
-            <p>No project scripts detected in <code>projects/</code> directory.</p>
-        </div>
-        {% endfor %}
-    </main>
+    </div>
 </body>
 </html>
