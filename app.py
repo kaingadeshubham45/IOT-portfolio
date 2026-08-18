@@ -80,18 +80,24 @@ PROJECTS = {
 
 @app.route('/')
 def index():
-    return render_template('index.html', projects=PROJECTS)
+    # Pass list of project objects so index.html can access p.id, p.title, p.icon, p.desc
+    return render_template('index.html', projects=list(PROJECTS.values()))
 
 @app.route('/project/<project_id>')
 def view_project(project_id):
     proj = PROJECTS.get(project_id)
     if not proj:
+        # Flexible matching for hyphens or underscores (e.g. p01, p01-virtual-mouse, p01_virtual_mouse)
+        norm_req = project_id.replace('-', '_').lower()
         for k, v in PROJECTS.items():
-            if k.startswith(project_id) or project_id.startswith(k):
+            norm_key = k.lower()
+            if norm_key.startswith(norm_req) or norm_req.startswith(norm_key) or norm_key[:3] == norm_req[:3]:
                 proj = v
                 break
+                
     if not proj:
-        return "Project Not Found", 404
+        return render_template('index.html', projects=list(PROJECTS.values())), 404
+        
     return render_template('project.html', project=proj)
 
 @app.route('/api/state/<project_id>')
@@ -100,4 +106,4 @@ def get_state(project_id):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=False)
