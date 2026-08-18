@@ -3,21 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} - Live Vision Demo</title>
+    <title>{{ project.title }} - Live Web Vision</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- MediaPipe In-Browser Vision Models -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        #webcam-canvas { transform: scaleX(-1); }
         #webcam-video { display: none; }
+        #webcam-canvas { transform: scaleX(-1); }
+        
+        /* Floating In-Page Virtual Cursor */
+        #virtual-cursor {
+            position: fixed;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(6, 182, 212, 0.7);
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 15px #38bdf8, 0 0 30px rgba(56, 189, 248, 0.5);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.1s, height 0.1s, background-color 0.1s;
+            display: none;
+        }
+        #virtual-cursor.clicking {
+            width: 32px;
+            height: 32px;
+            background: rgba(34, 197, 94, 0.9);
+            border-color: #4ade80;
+            box-shadow: 0 0 25px #22c55e;
+        }
+        
+        /* Click Ripple Effect */
+        .click-ripple {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #22c55e;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            animation: ripple-anim 0.5s ease-out forwards;
+        }
+        @keyframes ripple-anim {
+            0% { width: 10px; height: 10px; opacity: 1; }
+            100% { width: 60px; height: 60px; opacity: 0; }
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen relative select-none">
+
+    <!-- Virtual Cursor Element -->
+    <div id="virtual-cursor"></div>
+
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <a href="/" class="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-6 transition-colors">
+        <a href="/" class="interactive-elem inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-6 transition-colors p-2 rounded-lg hover:bg-slate-900">
             &larr; Back to Dashboard
         </a>
 
@@ -29,52 +72,70 @@
                 </div>
                 <p class="text-slate-400 text-sm md:text-base">{{ project.desc }}</p>
             </div>
-            <div id="connection-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider w-fit">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="badge-status">Ready for Live Demo</span>
+            <div id="connection-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider w-fit">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                <span id="badge-status">Interactive Vision Ready</span>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Camera & Canvas View -->
             <div class="lg:col-span-2 space-y-4">
                 <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
                     <video id="webcam-video" playsinline autoplay></video>
                     <canvas id="webcam-canvas" class="w-full h-full object-cover"></canvas>
                     
-                    <div id="start-screen" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-4 p-6 text-center z-10">
+                    <div id="start-screen" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-4 p-6 text-center z-20">
                         <div class="text-5xl animate-bounce">{{ project.icon }}</div>
-                        <h3 class="text-xl font-bold text-white">Start Interactive Demo</h3>
+                        <h3 class="text-xl font-bold text-white">Start Interactive Session</h3>
                         <p class="text-xs text-slate-400 max-w-sm">
-                            Click start to activate your device's camera and test real-time gesture tracking and telemetry live on this screen.
+                            Click start to enable your camera. You will be able to move an interactive virtual cursor or adjust audio directly inside this page using hand gestures.
                         </p>
-                        <button onclick="startInteractiveCam()" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-all shadow-lg shadow-blue-600/30">
-                            Launch Live Camera Feed
+                        <button onclick="startVisionApp()" class="interactive-elem px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition-all shadow-lg shadow-cyan-600/30 active:scale-95">
+                            Launch Hand Tracking
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive Test Playground inside the page -->
+                <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Interactive Test Buttons (Hover/Click with Gesture)</div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="triggerFeedback('Button Alpha Clicked')" class="interactive-elem p-3 rounded-xl bg-slate-800/80 hover:bg-cyan-600/30 border border-slate-700/60 text-xs font-medium transition-all text-center">
+                            🔘 Target A
+                        </button>
+                        <button onclick="triggerFeedback('Button Beta Clicked')" class="interactive-elem p-3 rounded-xl bg-slate-800/80 hover:bg-emerald-600/30 border border-slate-700/60 text-xs font-medium transition-all text-center">
+                            🔘 Target B
+                        </button>
+                        <button onclick="triggerFeedback('Button Gamma Clicked')" class="interactive-elem p-3 rounded-xl bg-slate-800/80 hover:bg-purple-600/30 border border-slate-700/60 text-xs font-medium transition-all text-center">
+                            🔘 Target C
                         </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Telemetry & Gesture Guide -->
             <div class="space-y-6">
                 <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
                     <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
-                        <span>⚡</span> Real-Time AI Telemetry
+                        <span>⚡</span> Live Vision Telemetry
                     </h3>
                     <div class="space-y-3 font-mono text-sm bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 text-emerald-400">
-                        <div>Vision Status: <span id="tel-status" class="text-cyan-400">Standby</span></div>
-                        <div>Landmarks: <span id="tel-pts" class="text-white">0 tracked</span></div>
-                        <div>Action Output: <span id="tel-action" class="text-yellow-400">None</span></div>
-                        <div>Virtual Output: <span id="tel-metric" class="text-emerald-300">Idle</span></div>
+                        <div>Tracking: <span id="tel-status" class="text-cyan-400">Standby</span></div>
+                        <div>Action: <span id="tel-action" class="text-yellow-400">None</span></div>
+                        <div>Cursor Pos: <span id="tel-pos" class="text-white">Idle</span></div>
+                        <div>Event Log: <span id="tel-log" class="text-emerald-300">Ready</span></div>
                     </div>
                 </div>
 
                 <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
                     <h3 class="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                        <span>💡</span> How to Demonstrate
+                        <span>💡</span> Gesture Controls
                     </h3>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        • <strong>P01 Mouse:</strong> Point index finger to generate cursor coordinate tracking.<br><br>
-                        • <strong>P02 Volume:</strong> Pinch index and thumb to dynamically calculate distance percentage on screen.<br><br>
-                        • <strong>P04 Counter:</strong> Hold up fingers to count and trigger virtual relays.
+                    <p class="text-xs text-slate-400 leading-relaxed space-y-2">
+                        • <strong>Move Cursor:</strong> Point index finger up to navigate the glowing cursor.<br><br>
+                        • <strong>Click / Select:</strong> Pinch index &amp; thumb together (or hover over any button for 0.8s) to trigger an on-screen click.<br><br>
+                        • <strong>Volume / Synth:</strong> Pinching adjusts dynamic visual output and in-browser audio tone.
                     </p>
                 </div>
             </div>
@@ -86,10 +147,68 @@
         const canvasElement = document.getElementById('webcam-canvas');
         const canvasCtx = canvasElement.getContext('2d');
         const startScreen = document.getElementById('start-screen');
-        const badgeStatus = document.getElementById('badge-status');
+        const cursor = document.getElementById('virtual-cursor');
+        
+        let lastX = window.innerWidth / 2;
+        let lastY = window.innerHeight / 2;
+        let isClicking = false;
+        let hoverTimer = null;
+        let lastHoverElem = null;
 
-        let hands;
-        let camera;
+        // Web Audio Synth for Volume / Demo feedback
+        let audioCtx = null;
+        let osc = null;
+        let gainNode = null;
+
+        function initAudio() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                osc = audioCtx.createOscillator();
+                gainNode = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+            } catch(e) {}
+        }
+
+        function triggerFeedback(msg) {
+            document.getElementById('tel-log').innerText = msg;
+            if (gainNode && audioCtx) {
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+            }
+        }
+
+        function createRipple(x, y) {
+            const ripple = document.createElement('div');
+            ripple.className = 'click-ripple';
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 500);
+        }
+
+        function performVirtualClick(x, y) {
+            cursor.classList.add('clicking');
+            createRipple(x, y);
+            
+            const elem = document.elementFromPoint(x, y);
+            if (elem) {
+                const clickable = elem.closest('button, a, .interactive-elem');
+                if (clickable) {
+                    clickable.click();
+                    clickable.classList.add('ring-2', 'ring-cyan-400');
+                    setTimeout(() => clickable.classList.remove('ring-2', 'ring-cyan-400'), 300);
+                }
+            }
+
+            setTimeout(() => {
+                cursor.classList.remove('clicking');
+            }, 250);
+        }
 
         function onResults(results) {
             canvasCtx.save();
@@ -97,65 +216,78 @@
             canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                document.getElementById('tel-status').innerText = 'Hand Detected';
-                document.getElementById('tel-pts').innerText = '21 Hand Points';
+                cursor.style.display = 'block';
+                document.getElementById('tel-status').innerText = 'Hand Active';
 
                 for (const landmarks of results.multiHandLandmarks) {
-                    // Draw connections & points
+                    // Draw Hand Skeleton
                     for (let i = 0; i < landmarks.length; i++) {
-                        const x = landmarks[i].x * canvasElement.width;
-                        const y = landmarks[i].y * canvasElement.height;
+                        const px = landmarks[i].x * canvasElement.width;
+                        const py = landmarks[i].y * canvasElement.height;
                         canvasCtx.beginPath();
-                        canvasCtx.arc(x, y, 4, 0, 2 * Math.PI);
+                        canvasCtx.arc(px, py, 3, 0, 2 * Math.PI);
                         canvasCtx.fillStyle = '#06b6d4';
                         canvasCtx.fill();
                     }
 
-                    const indexTip = landmarks[8];
-                    const thumbTip = landmarks[4];
-                    const x1 = indexTip.x * canvasElement.width;
-                    const y1 = indexTip.y * canvasElement.height;
-                    const x2 = thumbTip.x * canvasElement.width;
-                    const y2 = thumbTip.y * canvasElement.height;
-                    const dist = Math.hypot(x1 - x2, y1 - y2);
+                    // Inverted X for mirror canvas mapping
+                    const rawX = (1.0 - landmarks[8].x);
+                    const rawY = landmarks[8].y;
 
-                    canvasCtx.beginPath();
-                    canvasCtx.moveTo(x1, y1);
-                    canvasCtx.lineTo(x2, y2);
-                    canvasCtx.strokeStyle = '#22c55e';
-                    canvasCtx.lineWidth = 3;
-                    canvasCtx.stroke();
+                    // Smooth cursor coordinates
+                    const targetX = rawX * window.innerWidth;
+                    const targetY = rawY * window.innerHeight;
+                    lastX += (targetX - lastX) * 0.4;
+                    lastY += (targetY - lastY) * 0.4;
 
-                    const pct = Math.min(100, Math.max(0, Math.round((dist - 30) / 1.5)));
-                    document.getElementById('tel-action').innerText = dist < 45 ? 'Pinch / Click Trigger' : 'Tracking Movement';
-                    document.getElementById('tel-metric').innerText = `Value: ${pct}% | Pos: (${Math.round(x1)}, ${Math.round(y1)})`;
+                    cursor.style.left = `${lastX}px`;
+                    cursor.style.top = `${lastY}px`;
+                    document.getElementById('tel-pos').innerText = `(${Math.round(lastX)}, ${Math.round(lastY)})`;
 
-                    // On-screen metric bar
-                    canvasCtx.fillStyle = '#22c55e';
-                    canvasCtx.font = '20px sans-serif';
-                    canvasCtx.fillText(`Signal: ${pct}%`, 30, 50);
+                    // Pinch Click Detection (Index 8 & Thumb 4)
+                    const thumbX = (1.0 - landmarks[4].x) * window.innerWidth;
+                    const thumbY = landmarks[4].y * window.innerHeight;
+                    const pinchDist = Math.hypot(lastX - thumbX, lastY - thumbY);
+
+                    // Dynamic Tone modulation for P02 Volume simulation
+                    if (gainNode && audioCtx) {
+                        const volPct = Math.min(1.0, Math.max(0.0, (pinchDist - 40) / 160));
+                        osc.frequency.setValueAtTime(300 + (volPct * 400), audioCtx.currentTime);
+                    }
+
+                    if (pinchDist < 50) {
+                        if (!isClicking) {
+                            isClicking = true;
+                            document.getElementById('tel-action').innerText = 'Pinch Click!';
+                            performVirtualClick(lastX, lastY);
+                        }
+                    } else {
+                        isClicking = false;
+                        document.getElementById('tel-action').innerText = 'Moving Cursor';
+                    }
                 }
             } else {
+                cursor.style.display = 'none';
                 document.getElementById('tel-status').innerText = 'Searching Hand';
-                document.getElementById('tel-pts').innerText = '0 tracked';
-                document.getElementById('tel-action').innerText = 'Waiting for hand in view';
+                document.getElementById('tel-action').innerText = 'Idle';
             }
             canvasCtx.restore();
         }
 
-        async function startInteractiveCam() {
+        async function startVisionApp() {
             startScreen.style.display = 'none';
-            badgeStatus.innerText = 'Vision Engine Active';
+            initAudio();
+            document.getElementById('badge-status').innerText = 'Vision Engine Active';
 
             canvasElement.width = 640;
             canvasElement.height = 480;
 
-            hands = new Hands({
+            const hands = new Hands({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
             });
 
             hands.setOptions({
-                maxNumHands: 2,
+                maxNumHands: 1,
                 modelComplexity: 1,
                 minDetectionConfidence: 0.6,
                 minTrackingConfidence: 0.6
@@ -163,7 +295,7 @@
 
             hands.onResults(onResults);
 
-            camera = new Camera(videoElement, {
+            const camera = new Camera(videoElement, {
                 onFrame: async () => {
                     await hands.send({ image: videoElement });
                 },
