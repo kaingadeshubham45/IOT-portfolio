@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -89,7 +90,7 @@
             </div>
         </header>
 
-        <!-- Main Grid -->
+        <!-- Main Workspace -->
         <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             <div class="lg:col-span-8 space-y-4">
@@ -237,16 +238,52 @@
                 </div>
                 {% endif %}
 
-                <!-- 6. P06: Face Attendance -->
+                <!-- 6. P06: Face Attendance System with Dual-Blink Verification -->
                 {% if 'p06' in project.id %}
-                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Biometric Attendance Registry</h4>
-                        <button onclick="logAttendance()" class="interactive-elem px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold font-mono">RECORD PUNCH</button>
+                <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
+                    
+                    <!-- Top Registration Controls -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                        <div>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Registered Subject Profile</h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span id="profile-name" class="font-bold text-cyan-400 text-sm">Guest Candidate</span>
+                                <button onclick="promptChangeName()" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 hover:bg-cyan-900/60 border border-slate-700 text-slate-300">EDIT NAME ✏️</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <span class="text-[10px] font-mono text-slate-400 block uppercase">Dual-Blink Verification</span>
+                                <span id="blink-count-display" class="font-mono text-xs font-bold text-amber-400">Blinks: 0 / 2</span>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-xl" id="blink-icon">
+                                👁️
+                            </div>
+                        </div>
                     </div>
-                    <div id="attendance-log" class="p-3.5 bg-slate-950 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400 max-h-32 overflow-y-auto space-y-1">
-                        <div>[SYSTEM READY] Facial landmark scan active...</div>
+
+                    <!-- Liveness Progress Bar -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between font-mono text-[11px] text-slate-400">
+                            <span>Liveness Progress (Blink Twice to Punch)</span>
+                            <span id="blink-pct" class="text-emerald-400 font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                            <div id="blink-progress-bar" class="bg-gradient-to-r from-amber-500 to-emerald-400 h-full rounded-full transition-all duration-150" style="width: 0%;"></div>
+                        </div>
                     </div>
+
+                    <!-- Attendance Registry Table Log -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2 font-mono text-xs text-slate-400">
+                            <span>VERIFIED LOG DATABASE</span>
+                            <button onclick="clearAttendanceLog()" class="text-[10px] text-red-400 hover:underline">CLEAR LOG</button>
+                        </div>
+                        <div id="attendance-log-list" class="p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-xs max-h-36 overflow-y-auto space-y-1.5 text-slate-300">
+                            <div class="text-slate-600 text-[11px]">[SYSTEM READY] Look at camera and blink eyes twice to punch attendance...</div>
+                        </div>
+                    </div>
+
                 </div>
                 {% endif %}
 
@@ -377,7 +414,13 @@
                         <span>💡</span> GUIDE
                     </h3>
                     <div class="text-xs text-slate-400 leading-relaxed font-sans">
+                        {% if 'p06' in project.id %}
+                        • <strong>Step 1:</strong> Look directly into the camera. The system will detect your face and prompt for your name.<br><br>
+                        • <strong>Step 2:</strong> <strong>Blink both eyes twice</strong> to verify liveness.<br><br>
+                        • <strong>Step 3:</strong> Attendance is confirmed with date and timestamp, logged to database, and announced aloud.
+                        {% else %}
                         {{ project.desc }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -407,21 +450,96 @@
         let lastY = window.innerHeight / 2;
         let isPinching = false;
 
-        // Sound effect generator for clicks
-        function playClickSound() {
+        // Sound effect generator
+        function playChirpSound(freq = 880) {
             try {
                 const aCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = aCtx.createOscillator();
                 const g = aCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(880, aCtx.currentTime);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, aCtx.currentTime);
                 g.gain.setValueAtTime(0.1, aCtx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.001, aCtx.currentTime + 0.08);
+                g.gain.exponentialRampToValueAtTime(0.001, aCtx.currentTime + 0.1);
                 osc.connect(g);
                 g.connect(aCtx.destination);
                 osc.start();
-                osc.stop(aCtx.currentTime + 0.08);
+                osc.stop(aCtx.currentTime + 0.1);
             } catch (e) {}
+        }
+
+        // P06: Face Attendance State Engine
+        let registeredUserName = localStorage.getItem('attendance_name') || "";
+        let blinkCount = 0;
+        let eyeWasClosed = false;
+        let lastBlinkTime = 0;
+        let attendanceDebounce = false;
+
+        function promptChangeName() {
+            const input = prompt("Enter Name for Biometric Attendance Registration:", registeredUserName || "User");
+            if (input && input.trim() !== "") {
+                registeredUserName = input.trim();
+                localStorage.setItem('attendance_name', registeredUserName);
+                const el = document.getElementById('profile-name');
+                if (el) el.innerText = registeredUserName;
+                document.getElementById('tel-log').innerText = `Registered: ${registeredUserName}`;
+            }
+        }
+
+        function clearAttendanceLog() {
+            const logBox = document.getElementById('attendance-log-list');
+            if (logBox) logBox.innerHTML = '<div class="text-slate-600 text-[11px]">[LOG CLEARED] Ready for next entry...</div>';
+        }
+
+        function confirmAttendancePunch(userName) {
+            attendanceDebounce = true;
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = now.toLocaleDateString();
+
+            playChirpSound(1040);
+
+            // Append to table log
+            const logBox = document.getElementById('attendance-log-list');
+            if (logBox) {
+                const item = document.createElement('div');
+                item.className = "p-2 bg-emerald-950/60 border border-emerald-500/40 rounded-lg flex items-center justify-between text-emerald-300 font-bold";
+                item.innerHTML = `<span>👤 ${userName}</span><span class="text-slate-400 text-[10px] font-normal">${dateStr} • ${timeStr} ✅</span>`;
+                logBox.prepend(item);
+            }
+
+            // Toast alert
+            toastText.innerText = `Attendance Logged: ${userName}`;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+
+            // Speech confirmation
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(`Attendance marked successfully for ${userName}`);
+                u.rate = 1.0;
+                window.speechSynthesis.speak(u);
+            }
+
+            document.getElementById('tel-log').innerText = `PUNCH SUCCESS: ${userName} @ ${timeStr}`;
+
+            // Reset blinks after 3.5s
+            setTimeout(() => {
+                blinkCount = 0;
+                updateBlinkUI(0);
+                attendanceDebounce = false;
+            }, 3500);
+        }
+
+        function updateBlinkUI(count) {
+            const disp = document.getElementById('blink-count-display');
+            const bar = document.getElementById('blink-progress-bar');
+            const pct = document.getElementById('blink-pct');
+            const icon = document.getElementById('blink-icon');
+
+            if (disp) disp.innerText = `Blinks: ${count} / 2`;
+            if (bar) bar.style.width = `${(count / 2) * 100}%`;
+            if (pct) pct.innerText = `${Math.round((count / 2) * 100)}%`;
+            if (icon) icon.innerText = count >= 2 ? "✅" : (count === 1 ? "😉" : "👁️");
         }
 
         // P05 Rock Paper Scissors State
@@ -429,9 +547,7 @@
         let rpsHoldCurrent = null;
         let rpsHoldStart = null;
         let rpsLocked = false;
-        let playerScore = 0;
-        let aiScore = 0;
-        let winStreak = 0;
+        let playerScore = 0, aiScore = 0, winStreak = 0;
 
         function resetRPSScore() {
             playerScore = 0; aiScore = 0; winStreak = 0;
@@ -474,13 +590,13 @@
             setTimeout(() => { rpsLocked = false; rpsHoldStart = null; document.getElementById('rps-result').innerText = "HOLD FOR 3s AGAIN"; }, 3000);
         }
 
-        // P09 Drawing Board State
+        // P09 Drawing Board
         let drawPoints = [];
         let drawColor = '#06b6d4';
         function setDrawColor(c) { drawColor = c; }
         function clearCanvas() { drawPoints = []; }
 
-        // P10 Slide Presentation State
+        // P10 Slide Presentation
         let slideNo = 1;
         const slides = [
             "Slide 1: Edge AI & MediaPipe Architecture",
@@ -499,7 +615,7 @@
             document.getElementById('slide-frame').innerText = slides[slideNo - 1];
         }
 
-        // P11 Media Player State
+        // P11 Media Player
         let isPlaying = true;
         function triggerMedia(action) {
             if (action === 'PLAY') {
@@ -511,19 +627,7 @@
             }
         }
 
-        // P06 Attendance
-        function logAttendance() {
-            const now = new Date();
-            const logBox = document.getElementById('attendance-log');
-            if (logBox) {
-                const row = document.createElement('div');
-                row.innerText = `[${now.toLocaleDateString()} ${now.toLocaleTimeString()}] ✅ Verified ID #8842 - LOGGED`;
-                logBox.appendChild(row);
-                logBox.scrollTop = logBox.scrollHeight;
-            }
-        }
-
-        // P02 Web Audio Engine
+        // P02 Audio Engine
         let audioCtx = null, osc = null, gainNode = null;
         function initAudioEngine() {
             if (!audioCtx) {
@@ -560,7 +664,107 @@
             }
         }
 
-        function onResults(results) {
+        // FaceMesh Results (P06, P07, P08)
+        function onFaceResults(results) {
+            loading.style.display = 'none';
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                document.getElementById('tel-status').innerText = 'Face Locked';
+                const face = results.multiFaceLandmarks[0];
+
+                // Calculate Eye Aspect Ratio (EAR) for Left Eye (159, 145) and Right Eye (386, 374)
+                const leftEyeDist = Math.hypot(face[159].x - face[145].x, face[159].y - face[145].y);
+                const rightEyeDist = Math.hypot(face[386].x - face[374].x, face[386].y - face[374].y);
+                const avgEyeDist = (leftEyeDist + rightEyeDist) / 2;
+
+                // Draw Facial Landmark Bounding Box
+                let minX = 1, maxX = 0, minY = 1, maxY = 0;
+                face.forEach(pt => {
+                    if (pt.x < minX) minX = pt.x;
+                    if (pt.x > maxX) maxX = pt.x;
+                    if (pt.y < minY) minY = pt.y;
+                    if (pt.y > maxY) maxY = pt.y;
+                });
+
+                const boxX = minX * canvas.width;
+                const boxY = minY * canvas.height;
+                const boxW = (maxX - minX) * canvas.width;
+                const boxH = (maxY - minY) * canvas.height;
+
+                ctx.strokeStyle = blinkCount >= 2 ? '#10b981' : '#06b6d4';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+                // Draw User Label above Box
+                ctx.fillStyle = '#06b6d4';
+                ctx.font = '14px JetBrains Mono, monospace';
+                ctx.fillText(registeredUserName ? `ID: ${registeredUserName}` : "FACE DETECTED", boxX + 6, boxY - 8);
+
+                // Check First-Time Registration Name Prompt
+                if (!registeredUserName && !attendanceDebounce) {
+                    setTimeout(() => {
+                        if (!registeredUserName) promptChangeName();
+                    }, 800);
+                }
+
+                // P06: Dual Blink Recognition Logic
+                if (projectId.includes('p06') && !attendanceDebounce) {
+                    const isClosed = avgEyeDist < 0.015;
+
+                    if (isClosed && !eyeWasClosed) {
+                        eyeWasClosed = true;
+                    } else if (!isClosed && eyeWasClosed) {
+                        eyeWasClosed = false;
+                        const nowTime = Date.now();
+
+                        // Register blink if within 2.5 seconds of previous blink
+                        if (nowTime - lastBlinkTime < 2500 || blinkCount === 0) {
+                            blinkCount++;
+                            lastBlinkTime = nowTime;
+                            playChirpSound(600 + blinkCount * 200);
+                            updateBlinkUI(blinkCount);
+
+                            if (blinkCount >= 2) {
+                                const activeName = registeredUserName || "Candidate #8842";
+                                confirmAttendancePunch(activeName);
+                            }
+                        } else {
+                            blinkCount = 1;
+                            lastBlinkTime = nowTime;
+                            updateBlinkUI(1);
+                        }
+                    }
+                }
+
+                // P08: Drowsiness Detection
+                if (projectId.includes('p08')) {
+                    const earMetric = document.getElementById('ear-metric');
+                    const drowsyBanner = document.getElementById('drowsy-banner');
+                    if (earMetric) earMetric.innerText = `EAR: ${avgEyeDist.toFixed(3)}`;
+                    if (avgEyeDist < 0.014) {
+                        if (drowsyBanner) {
+                            drowsyBanner.className = "p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-center font-mono text-red-400 font-bold text-sm animate-pulse";
+                            drowsyBanner.innerText = "🚨 DROWSINESS WARNING: EYES CLOSED DETECTED!";
+                        }
+                    } else {
+                        if (drowsyBanner) {
+                            drowsyBanner.className = "p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center font-mono text-emerald-400 font-bold text-sm";
+                            drowsyBanner.innerText = "🟢 DRIVER ATTENTIVE: EYE ASPECT RATIO OPTIMAL";
+                        }
+                    }
+                }
+
+            } else {
+                document.getElementById('tel-status').innerText = 'Scanning';
+            }
+            ctx.restore();
+        }
+
+        // Hands Results (P01, P02, P03, P04, P05, P09, P10, P11, P12)
+        function onHandResults(results) {
             loading.style.display = 'none';
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -572,13 +776,11 @@
 
                 const wrist = lms[0];
                 const thumbTip = lms[4];
-                const thumbIP = lms[3];
                 const indexTip = lms[8];
                 const pinkyMCP = lms[17];
 
                 const pinchDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
 
-                // Landmark Extension Rigorous Vector Logic
                 let count = 0;
                 const palmScale = Math.hypot(wrist.x - lms[9].x, wrist.y - lms[9].y);
                 const distThumbToPinky = Math.hypot(thumbTip.x - pinkyMCP.x, thumbTip.y - pinkyMCP.y);
@@ -609,7 +811,7 @@
                         : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
                 }
 
-                // 1. P01 Virtual Mouse Mode (Strict Physical Touch to Click)
+                // 1. P01 Virtual Mouse
                 if (projectId.includes('p01')) {
                     cursor.style.display = 'block';
                     const targetX = (1.0 - indexTip.x) * window.innerWidth;
@@ -620,12 +822,11 @@
                     cursor.style.left = lastX + 'px';
                     cursor.style.top = lastY + 'px';
 
-                    // Strict Touch Pinch Threshold: Distance <= 0.028 requires fingertips to touch
                     if (pinchDist <= 0.028) {
                         if (!isPinching) {
                             isPinching = true;
                             cursor.classList.add('pinching');
-                            playClickSound();
+                            playChirpSound(880);
 
                             const elem = document.elementFromPoint(lastX, lastY);
                             const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
@@ -686,7 +887,7 @@
                     document.getElementById('tel-log').innerText = `Active Fingers: ${count}/5`;
                 }
 
-                // 5. P05 3-Second Hold Rock Paper Scissors
+                // 5. P05 Rock Paper Scissors
                 if (projectId.includes('p05')) {
                     if (count === 0) detectedRPS = "ROCK";
                     else if (count === 2 && activeFingers[1] && activeFingers[2]) detectedRPS = "SCISSORS";
@@ -780,7 +981,6 @@
                 }
             }
 
-            // Render Drawing Board Points (P09)
             if (projectId.includes('p09') && drawPoints.length > 1) {
                 for (let i = 1; i < drawPoints.length; i++) {
                     ctx.beginPath();
@@ -800,28 +1000,61 @@
             canvas.width = 640;
             canvas.height = 480;
 
-            const hands = new Hands({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-            });
+            const isFaceModule = projectId.includes('p06') || projectId.includes('p07') || projectId.includes('p08');
 
-            hands.setOptions({
-                maxNumHands: 1,
-                modelComplexity: 0,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
-            });
+            if (isFaceModule) {
+                // Initialize FaceMesh
+                const faceMesh = new FaceMesh({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+                });
 
-            hands.onResults(onResults);
+                faceMesh.setOptions({
+                    maxNumFaces: 1,
+                    refineLandmarks: true,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
 
-            const camera = new Camera(video, {
-                onFrame: async () => {
-                    await hands.send({ image: video });
-                },
-                width: 640,
-                height: 480
-            });
+                faceMesh.onResults(onFaceResults);
 
-            camera.start();
+                const camera = new Camera(video, {
+                    onFrame: async () => {
+                        await faceMesh.send({ image: video });
+                    },
+                    width: 640,
+                    height: 480
+                });
+                camera.start();
+
+                if (registeredUserName) {
+                    const el = document.getElementById('profile-name');
+                    if (el) el.innerText = registeredUserName;
+                }
+
+            } else {
+                // Initialize Hands
+                const hands = new Hands({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+                });
+
+                hands.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 0,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+
+                hands.onResults(onHandResults);
+
+                const camera = new Camera(video, {
+                    onFrame: async () => {
+                        await hands.send({ image: video });
+                    },
+                    width: 640,
+                    height: 480
+                });
+                camera.start();
+            }
         });
     </script>
 </body>
