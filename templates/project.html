@@ -110,7 +110,7 @@
                     </div>
                 </div>
 
-                <!-- 1. P01: Virtual Mouse Control -->
+                <!-- 1. P01: Virtual Mouse -->
                 {% if 'p01' in project.id %}
                 <div class="glass-panel rounded-xl p-4 border-slate-800">
                     <div class="text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-3">Action Targets (Pinch Thumb + Index to Click)</div>
@@ -177,7 +177,7 @@
                 </div>
                 {% endif %}
 
-                <!-- 4. P04: Finger Counter & Showcase -->
+                <!-- 4. P04: Finger Counter -->
                 {% if 'p04' in project.id %}
                 <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -197,31 +197,52 @@
                 </div>
                 {% endif %}
 
-                <!-- 5. P05: Rock Paper Scissors -->
+                <!-- 5. P05: Upgraded 3-Second Hold Rock Paper Scissors Battle Engine -->
                 {% if 'p05' in project.id %}
-                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">AI Gesture Battle Arena</h4>
-                        <button onclick="triggerRPSRound()" class="interactive-elem px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-xs font-bold font-mono">LOCK MOVE</button>
+                <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
+                    
+                    <!-- Score & Streak Bar -->
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
+                        <div class="flex items-center gap-6 font-mono text-xs">
+                            <div>PLAYER: <span id="rps-player-score" class="text-cyan-400 font-bold text-base">0</span></div>
+                            <div>AI: <span id="rps-ai-score" class="text-amber-400 font-bold text-base">0</span></div>
+                            <div>STREAK: <span id="rps-streak" class="text-emerald-400 font-bold text-base">🔥 0</span></div>
+                        </div>
+                        <button onclick="resetRPSScore()" class="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-900 border border-slate-700 hover:border-red-500 text-slate-400 hover:text-red-400 transition-all">
+                            RESET SCORE
+                        </button>
                     </div>
+
+                    <!-- Hold-to-Lock Meter -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-xs font-mono">
+                            <span class="text-slate-400">HOLD MOVE FOR 3s TO LOCK:</span>
+                            <span id="rps-timer-text" class="text-cyan-400 font-bold">0.0s / 3.0s</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                            <div id="rps-progress-bar" class="bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 h-full rounded-full transition-all duration-75" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Arena Battle Cards -->
                     <div class="grid grid-cols-3 gap-4 text-center">
                         <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                            <span class="text-xs text-slate-500 font-mono block mb-1">PLAYER MOVE</span>
+                            <span class="text-xs text-slate-500 font-mono block mb-1">PLAYER STANCE</span>
                             <span id="player-move" class="text-2xl font-bold text-cyan-400">ROCK ✊</span>
                         </div>
                         <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                            <span class="text-xs text-slate-500 font-mono block mb-1">AI ENGINE</span>
+                            <span class="text-xs text-slate-500 font-mono block mb-1">AI BOT</span>
                             <span id="ai-move" class="text-2xl font-bold text-amber-400">WAITING 🤖</span>
                         </div>
                         <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col justify-center">
-                            <span class="text-xs text-slate-500 font-mono block mb-1">ROUND OUTCOME</span>
-                            <span id="rps-result" class="text-sm font-bold text-emerald-400 font-mono">READY</span>
+                            <span class="text-xs text-slate-500 font-mono block mb-1">OUTCOME</span>
+                            <span id="rps-result" class="text-xs font-bold text-emerald-400 font-mono">HOLD TO BATTLE</span>
                         </div>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- 6. P06: Face Attendance System -->
+                <!-- 6. P06: Face Attendance -->
                 {% if 'p06' in project.id %}
                 <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -361,7 +382,12 @@
                         <span>💡</span> GUIDE
                     </h3>
                     <div class="text-xs text-slate-400 leading-relaxed font-sans">
+                        {% if 'p05' in project.id %}
+                        • Hold <strong>ROCK (Fist)</strong>, <strong>PAPER (Open Palm)</strong>, or <strong>SCISSORS (2 Fingers)</strong> for <strong>3 seconds</strong> without changing.<br><br>
+                        • The progress meter will fill up, lock in your move, trigger the AI battle, and announce the winner aloud.
+                        {% else %}
                         {{ project.desc }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -389,6 +415,70 @@
 
         let lastX = window.innerWidth / 2;
         let lastY = window.innerHeight / 2;
+
+        // Rock Paper Scissors State (P05)
+        let detectedRPS = "ROCK";
+        let rpsHoldCurrent = null;
+        let rpsHoldStart = null;
+        let rpsLocked = false;
+        let playerScore = 0;
+        let aiScore = 0;
+        let winStreak = 0;
+
+        function resetRPSScore() {
+            playerScore = 0;
+            aiScore = 0;
+            winStreak = 0;
+            document.getElementById('rps-player-score').innerText = '0';
+            document.getElementById('rps-ai-score').innerText = '0';
+            document.getElementById('rps-streak').innerText = '🔥 0';
+            document.getElementById('rps-result').innerText = 'SCORE RESET';
+        }
+
+        function executeRPSBattle(lockedPlayerMove) {
+            rpsLocked = true;
+            const moves = ["ROCK ✊", "PAPER ✋", "SCISSORS ✌️"];
+            const ai = moves[Math.floor(Math.random() * moves.length)];
+            
+            document.getElementById('ai-move').innerText = ai;
+
+            let outcome = "TIE MATCH ⚖️";
+            let speech = "It is a tie!";
+
+            if (
+                (lockedPlayerMove === "ROCK" && ai.includes("SCISSORS")) ||
+                (lockedPlayerMove === "PAPER" && ai.includes("ROCK")) ||
+                (lockedPlayerMove === "SCISSORS" && ai.includes("PAPER"))
+            ) {
+                outcome = "YOU WIN! 🎉";
+                speech = `You win! ${lockedPlayerMove} beats ${ai.split(' ')[0]}`;
+                playerScore++;
+                winStreak++;
+            } else if (!ai.includes(lockedPlayerMove)) {
+                outcome = "AI WINS 🤖";
+                speech = `AI wins! ${ai.split(' ')[0]} beats ${lockedPlayerMove}`;
+                aiScore++;
+                winStreak = 0;
+            }
+
+            document.getElementById('rps-player-score').innerText = playerScore;
+            document.getElementById('rps-ai-score').innerText = aiScore;
+            document.getElementById('rps-streak').innerText = `🔥 ${winStreak}`;
+            document.getElementById('rps-result').innerText = outcome;
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(speech);
+                u.rate = 1.0;
+                window.speechSynthesis.speak(u);
+            }
+
+            setTimeout(() => {
+                rpsLocked = false;
+                rpsHoldStart = null;
+                document.getElementById('rps-result').innerText = "HOLD FOR 3s AGAIN";
+            }, 3000);
+        }
 
         // Drawing board state (P09)
         let drawPoints = [];
@@ -425,22 +515,6 @@
             } else {
                 document.getElementById('tel-log').innerText = `Media Action: ${action}`;
             }
-        }
-
-        // Rock Paper Scissors (P05)
-        let detectedRPS = "ROCK";
-        function triggerRPSRound() {
-            const moves = ["ROCK ✊", "PAPER ✋", "SCISSORS ✌️"];
-            const ai = moves[Math.floor(Math.random() * moves.length)];
-            document.getElementById('ai-move').innerText = ai;
-            
-            let outcome = "TIE MATCH ⚖️";
-            if (detectedRPS === "ROCK" && ai.includes("SCISSORS")) outcome = "PLAYER WINS 🎉";
-            else if (detectedRPS === "PAPER" && ai.includes("ROCK")) outcome = "PLAYER WINS 🎉";
-            else if (detectedRPS === "SCISSORS" && ai.includes("PAPER")) outcome = "PLAYER WINS 🎉";
-            else if (!ai.includes(detectedRPS)) outcome = "AI WINS 🤖";
-
-            document.getElementById('rps-result').innerText = outcome;
         }
 
         // Attendance (P06)
@@ -504,12 +578,41 @@
 
                 const wrist = lms[0];
                 const thumbTip = lms[4];
-                const thumbIP = lms[3];
-                const indexMCP = lms[5];
                 const indexTip = lms[8];
                 const pinkyMCP = lms[17];
 
                 const pinchDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+
+                // Landmark Extension Rigorous Vector Logic
+                let count = 0;
+                const palmScale = Math.hypot(wrist.x - lms[9].x, wrist.y - lms[9].y);
+                const distThumbToPinky = Math.hypot(thumbTip.x - pinkyMCP.x, thumbTip.y - pinkyMCP.y);
+                const isThumbOpen = distThumbToPinky > palmScale * 0.72;
+                if (isThumbOpen) count++;
+
+                const tips = [8, 12, 16, 20];
+                const pips = [6, 10, 14, 18];
+                const activeFingers = [isThumbOpen];
+
+                tips.forEach((t, i) => {
+                    const isExtended = (lms[t].y < lms[pips[i]].y);
+                    if (isExtended) count++;
+                    activeFingers.push(isExtended);
+
+                    const el = document.getElementById(`f-${i + 2}`);
+                    if (el) {
+                        el.className = isExtended 
+                            ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
+                            : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
+                    }
+                });
+
+                const thEl = document.getElementById('f-1');
+                if (thEl) {
+                    thEl.className = isThumbOpen 
+                        ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
+                        : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
+                }
 
                 // 1. P01 Virtual Mouse
                 if (projectId.includes('p01')) {
@@ -572,54 +675,14 @@
                     document.getElementById('tel-log').innerText = bVal === 0 ? 'Blackout (0%)' : `Luminance: ${bVal}%`;
                 }
 
-                // 4. P04 Finger Counter - RIGOROUS VECTOR LOGIC
-                let count = 0;
-
-                // Palm scale reference: distance from wrist to middle MCP (landmark 9)
-                const palmScale = Math.hypot(wrist.x - lms[9].x, wrist.y - lms[9].y);
-
-                // Robust Thumb Extension: Distance from thumb tip to pinky MCP base
-                // When fist is closed, thumb folds in and distThumbToPinky is small (< palmScale * 0.65)
-                const distThumbToPinky = Math.hypot(thumbTip.x - pinkyMCP.x, thumbTip.y - pinkyMCP.y);
-                const distThumbToIP = Math.hypot(thumbTip.x - thumbIP.x, thumbTip.y - thumbIP.y);
-                const isThumbOpen = distThumbToPinky > palmScale * 0.72;
-
-                if (isThumbOpen) count++;
-
-                // 4 Fingers (Index, Middle, Ring, Pinky): Check if tip is higher than PIP knuckle joint
-                const tips = [8, 12, 16, 20];
-                const pips = [6, 10, 14, 18];
-                const activeFingers = [isThumbOpen];
-
-                tips.forEach((t, i) => {
-                    const pip = pips[i];
-                    // Finger is considered extended if the tip is above its PIP joint relative to wrist orientation
-                    const isExtended = (lms[t].y < lms[pip].y);
-                    if (isExtended) count++;
-                    activeFingers.push(isExtended);
-
-                    const el = document.getElementById(`f-${i + 2}`);
-                    if (el) {
-                        el.className = isExtended 
-                            ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
-                            : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
-                    }
-                });
-
-                const thEl = document.getElementById('f-1');
-                if (thEl) {
-                    thEl.className = isThumbOpen 
-                        ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
-                        : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
-                }
-                
-                const badge = document.getElementById('finger-count-badge');
-                if (badge) badge.innerText = count;
+                // 4. P04 Finger Counter
                 if (projectId.includes('p04')) {
+                    const badge = document.getElementById('finger-count-badge');
+                    if (badge) badge.innerText = count;
                     document.getElementById('tel-log').innerText = `Active Fingers: ${count}/5`;
                 }
 
-                // 5. P05 Rock Paper Scissors State
+                // 5. P05 3-Second Hold Rock Paper Scissors
                 if (projectId.includes('p05')) {
                     if (count === 0) detectedRPS = "ROCK";
                     else if (count === 2 && activeFingers[1] && activeFingers[2]) detectedRPS = "SCISSORS";
@@ -627,20 +690,41 @@
 
                     const moveEl = document.getElementById('player-move');
                     if (moveEl) moveEl.innerText = `${detectedRPS} ${detectedRPS === 'ROCK' ? '✊' : detectedRPS === 'PAPER' ? '✋' : '✌️'}`;
-                    document.getElementById('tel-log').innerText = `Player Stance: ${detectedRPS}`;
+
+                    if (!rpsLocked) {
+                        if (rpsHoldCurrent !== detectedRPS) {
+                            rpsHoldCurrent = detectedRPS;
+                            rpsHoldStart = Date.now();
+                        } else if (rpsHoldStart) {
+                            const elapsed = Date.now() - rpsHoldStart;
+                            const pct = Math.min(100, (elapsed / 3000) * 100);
+                            const sec = (elapsed / 1000).toFixed(1);
+
+                            const pBar = document.getElementById('rps-progress-bar');
+                            const tText = document.getElementById('rps-timer-text');
+                            if (pBar) pBar.style.width = pct + '%';
+                            if (tText) tText.innerText = `${sec}s / 3.0s`;
+
+                            // Trigger shuffle animation for AI
+                            const aiShuffles = ["ROCK ✊", "PAPER ✋", "SCISSORS ✌️"];
+                            document.getElementById('ai-move').innerText = aiShuffles[Math.floor((elapsed / 200) % 3)];
+
+                            // 3.0s Hold Reached -> Lock & Execute!
+                            if (elapsed >= 3000) {
+                                executeRPSBattle(detectedRPS);
+                            }
+                        }
+                    }
                 }
 
                 // 9. P09 Virtual Drawing
                 if (projectId.includes('p09')) {
-                    const drawX = (1.0 - indexTip.x) * canvas.width;
-                    const drawY = indexTip.y * canvas.height;
-                    
-                    if (activeFingers[1] && !activeFingers[2]) { // Only index up = drawing
+                    if (activeFingers[1] && !activeFingers[2]) {
                         drawPoints.push({ x: indexTip.x * canvas.width, y: indexTip.y * canvas.height, color: drawColor });
                     }
                 }
 
-                // 12. P12 Sign Language Recognition State
+                // 12. P12 Sign Language Recognition
                 if (projectId.includes('p12')) {
                     let sign = "A";
                     if (count === 0) sign = "A (Fist)";
@@ -670,6 +754,15 @@
                 document.getElementById('tel-status').innerText = 'Scanning';
                 const badge = document.getElementById('finger-count-badge');
                 if (badge) badge.innerText = "0";
+
+                // Reset RPS hold timer if hand leaves view
+                if (projectId.includes('p05') && !rpsLocked) {
+                    rpsHoldStart = null;
+                    const pBar = document.getElementById('rps-progress-bar');
+                    const tText = document.getElementById('rps-timer-text');
+                    if (pBar) pBar.style.width = '0%';
+                    if (tText) tText.innerText = '0.0s / 3.0s';
+                }
             }
 
             // Render Drawing Board Points (P09)
