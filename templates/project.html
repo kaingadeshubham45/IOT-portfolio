@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -18,8 +18,8 @@
         #cam-canvas { transform: scaleX(-1); }
         
         .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(51, 65, 85, 0.6);
         }
         
@@ -32,36 +32,27 @@
             z-index: 9999;
             transform: translate(-50%, -50%);
             display: none;
-            transition: transform 0.05s ease-out;
+            transition: transform 0.04s ease-out;
+            background: rgba(6, 182, 212, 0.9);
+            border: 3px solid #38bdf8;
+            box-shadow: 0 0 22px rgba(56, 189, 248, 0.8);
         }
-        #cursor-right {
-            background: rgba(6, 182, 212, 0.85);
-            border: 2px solid #38bdf8;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
-        }
-        #cursor-left {
-            background: rgba(245, 158, 11, 0.85);
-            border: 2px solid #fbbf24;
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
-        }
-        .v-cursor.clicking {
-            width: 34px;
-            height: 34px;
-            background: rgba(34, 197, 94, 0.9) !important;
+        .v-cursor.pinching {
+            width: 36px;
+            height: 36px;
+            background: rgba(34, 197, 94, 0.95) !important;
             border-color: #4ade80 !important;
-            box-shadow: 0 0 25px rgba(74, 222, 128, 0.8) !important;
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.9) !important;
         }
     </style>
 </head>
 <body class="text-slate-100 min-h-screen relative select-none antialiased flex flex-col justify-between">
 
-    <!-- Cursors -->
-    <div id="cursor-right" class="v-cursor"></div>
-    <div id="cursor-left" class="v-cursor"></div>
+    <div id="virtual-cursor" class="v-cursor"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
         
-        <!-- Navigation & Header Bar -->
+        <!-- Header -->
         <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-800/80">
             <div class="flex items-center gap-4">
                 <a href="/" class="interactive-elem flex items-center justify-center w-10 h-10 rounded-xl glass-panel text-slate-400 hover:text-white hover:border-cyan-500/50 hover:bg-slate-800 transition-all">
@@ -82,18 +73,18 @@
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg glass-panel border-slate-800 text-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span class="font-mono text-emerald-400 font-medium">CAMERA READY</span>
+                    <span class="font-mono text-emerald-400 font-medium">CAM READY</span>
                 </div>
             </div>
         </header>
 
-        <!-- Main Workspace Grid -->
+        <!-- Main Workspace -->
         <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Left Vision Panel (8 Cols) -->
             <div class="lg:col-span-8 space-y-4">
+                
+                <!-- Viewport -->
                 <div class="relative glass-panel rounded-2xl overflow-hidden aspect-video border border-slate-800 shadow-2xl flex items-center justify-center">
-                    <!-- Corner HUD Brackets -->
                     <div class="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-cyan-500/50 pointer-events-none"></div>
                     <div class="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-cyan-500/50 pointer-events-none"></div>
                     <div class="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-cyan-500/50 pointer-events-none"></div>
@@ -108,40 +99,37 @@
                     </div>
                 </div>
 
-                <!-- Project-Specific Action Workspaces -->
-                
-                <!-- P01: Virtual Mouse -->
-                {% if 'mouse' in project.id %}
+                <!-- 1. P01: Virtual Mouse (Pinch Click) -->
+                {% if 'p01' in project.id %}
                 <div class="glass-panel rounded-xl p-4 border-slate-800">
-                    <div class="text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-3">Interactive Targets (Hover 0.5s)</div>
+                    <div class="text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-3">Action Targets (Pinch Thumb + Index to Click)</div>
                     <div class="grid grid-cols-3 gap-3">
-                        <button onclick="handleTargetClick('Good Morning! Target 1 has been activated successfully.', 'Target 1: Good Morning! ☀️')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-cyan-950/40 border border-slate-800 hover:border-cyan-500/50 text-xs font-medium transition-all text-center group">
+                        <button onclick="handlePinchClick('Good Morning! Target 1 triggered.', 'Target 1: Good Morning! ☀️')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-cyan-950/40 border border-slate-800 hover:border-cyan-500/50 text-xs font-medium transition-all text-center">
                             <span class="block text-base mb-1">☀️</span>
-                            <span class="text-slate-200 group-hover:text-cyan-400">Good Morning</span>
+                            <span>Good Morning</span>
                         </button>
-                        <button onclick="handleTargetClick('IoT Relay Channel 1 Toggled ON.', 'Target 2: Relay Toggled ⚡')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-emerald-950/40 border border-slate-800 hover:border-emerald-500/50 text-xs font-medium transition-all text-center group">
+                        <button onclick="handlePinchClick('Relay Channel Activated.', 'Target 2: Relay Toggled ⚡')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-emerald-950/40 border border-slate-800 hover:border-emerald-500/50 text-xs font-medium transition-all text-center">
                             <span class="block text-base mb-1">⚡</span>
-                            <span class="text-slate-200 group-hover:text-emerald-400">Toggle Relay</span>
+                            <span>Toggle Relay</span>
                         </button>
-                        <button onclick="handleTargetClick('Snapshot Captured and Saved to Storage.', 'Target 3: Snapshot Saved 📸')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-purple-950/40 border border-slate-800 hover:border-purple-500/50 text-xs font-medium transition-all text-center group">
+                        <button onclick="handlePinchClick('Camera Snapshot Saved.', 'Target 3: Snapshot Saved 📸')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-purple-950/40 border border-slate-800 hover:border-purple-500/50 text-xs font-medium transition-all text-center">
                             <span class="block text-base mb-1">📸</span>
-                            <span class="text-slate-200 group-hover:text-purple-400">Capture Frame</span>
+                            <span>Capture Frame</span>
                         </button>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- P02: Virtual Volume -->
-                {% if 'volume' in project.id %}
+                <!-- 2. P02: Virtual Volume Control -->
+                {% if 'p02' in project.id %}
                 <div class="glass-panel rounded-xl p-5 border-slate-800">
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Output Gain Synthesis</h4>
-                            <p class="text-xs text-slate-500">Logarithmic elevation scaling with hard mute at bottom.</p>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Audio Gain Synthesis</h4>
+                            <p class="text-xs text-slate-500">Raise hand to increase volume; lower hand to mute.</p>
                         </div>
-                        <button id="audio-toggle-btn" onclick="toggleAudioDemo()" class="interactive-elem text-xs px-3.5 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-semibold transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-900/30">
-                            <span>🔊</span>
-                            <span>Start Audio Stream</span>
+                        <button id="audio-toggle-btn" onclick="toggleAudioDemo()" class="interactive-elem text-xs px-3.5 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-semibold transition-all">
+                            Start Audio Stream 🔊
                         </button>
                     </div>
                     <div class="w-full bg-slate-950 h-7 rounded-lg overflow-hidden border border-slate-800 p-1 mb-2">
@@ -155,123 +143,84 @@
                 </div>
                 {% endif %}
 
-                <!-- P03: Virtual Keyboard -->
-                {% if 'keyboard' in project.id %}
-                <div class="glass-panel rounded-xl p-4 border-slate-800">
-                    <div class="flex justify-between items-center mb-2.5">
-                        <div class="text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider">Dual-Hand Active Buffer (R: Cyan / L: Amber)</div>
-                        <button onclick="clearType()" class="interactive-elem text-xs px-3 py-1 bg-red-950/60 hover:bg-red-800 text-red-300 rounded-md border border-red-800 font-mono transition-all">CLEAR</button>
+                <!-- 3. P03: Virtual Brightness Control -->
+                {% if 'p03' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Backlight Luminance Simulation</h4>
+                        <span id="brightness-pct" class="font-mono text-amber-400 font-bold text-sm">75%</span>
                     </div>
-                    <div id="typed-text" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 font-mono text-cyan-400 text-base mb-3 min-h-[46px] flex items-center">
-                        <span class="text-slate-600 text-xs">Hover over letters with either index finger...</span>
+                    <div class="w-full bg-slate-950 h-7 rounded-lg overflow-hidden border border-slate-800 p-1 mb-2">
+                        <div id="brightness-meter" class="bg-gradient-to-r from-amber-600 to-yellow-300 h-full rounded transition-all duration-75" style="width: 75%;"></div>
                     </div>
-                    <div class="space-y-1.5 select-none">
-                        <div class="grid grid-cols-10 gap-1.5 font-mono text-xs text-center font-bold">
-                            <button onclick="typeKey('Q')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">Q</button>
-                            <button onclick="typeKey('W')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">W</button>
-                            <button onclick="typeKey('E')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">E</button>
-                            <button onclick="typeKey('R')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">R</button>
-                            <button onclick="typeKey('T')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">T</button>
-                            <button onclick="typeKey('Y')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">Y</button>
-                            <button onclick="typeKey('U')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">U</button>
-                            <button onclick="typeKey('I')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">I</button>
-                            <button onclick="typeKey('O')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">O</button>
-                            <button onclick="typeKey('P')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">P</button>
-                        </div>
-                        <div class="grid grid-cols-9 gap-1.5 px-3 font-mono text-xs text-center font-bold">
-                            <button onclick="typeKey('A')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">A</button>
-                            <button onclick="typeKey('S')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">S</button>
-                            <button onclick="typeKey('D')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">D</button>
-                            <button onclick="typeKey('F')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">F</button>
-                            <button onclick="typeKey('G')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">G</button>
-                            <button onclick="typeKey('H')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">H</button>
-                            <button onclick="typeKey('J')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">J</button>
-                            <button onclick="typeKey('K')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">K</button>
-                            <button onclick="typeKey('L')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">L</button>
-                        </div>
-                        <div class="grid grid-cols-7 gap-1.5 px-8 font-mono text-xs text-center font-bold">
-                            <button onclick="typeKey('Z')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">Z</button>
-                            <button onclick="typeKey('X')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">X</button>
-                            <button onclick="typeKey('C')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">C</button>
-                            <button onclick="typeKey('V')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">V</button>
-                            <button onclick="typeKey('B')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">B</button>
-                            <button onclick="typeKey('N')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">N</button>
-                            <button onclick="typeKey('M')" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-cyan-950 rounded-lg border border-slate-800 hover:border-cyan-500/50 transition-all">M</button>
-                        </div>
-                        <div class="grid grid-cols-4 gap-2 pt-1">
-                            <button onclick="typeKey(' ')" class="interactive-elem col-span-3 p-2.5 bg-slate-900/90 hover:bg-emerald-950/40 rounded-lg border border-slate-800 hover:border-emerald-500/50 font-mono text-xs font-bold text-center transition-all">SPACE</button>
-                            <button onclick="backspaceType()" class="interactive-elem p-2.5 bg-slate-900/90 hover:bg-red-950/40 rounded-lg border border-slate-800 hover:border-red-500/50 font-mono text-xs font-bold text-center transition-all">⌫ DEL</button>
-                        </div>
+                    <div id="brightness-preview" class="w-full h-16 rounded-lg bg-white/75 border border-slate-700 flex items-center justify-center text-xs font-mono text-slate-950 font-bold">
+                        SCREEN BACKLIGHT LUMINANCE PREVIEW
                     </div>
                 </div>
                 {% endif %}
+
+                <!-- 4. P04: Finger Counter -->
+                {% if 'p04' in project.id %}
+                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <div>
+                            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Real-Time Showcase Count</h4>
+                            <p class="text-xs text-slate-500">Displays exact number of extended fingers (1 to 5).</p>
+                        </div>
+                        <span id="finger-count-badge" class="font-mono text-2xl font-bold px-4 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">0</span>
+                    </div>
+                    <div class="grid grid-cols-5 gap-3 text-center font-mono text-xs">
+                        <div id="f-1" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">THUMB</div>
+                        <div id="f-2" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">INDEX</div>
+                        <div id="f-3" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">MIDDLE</div>
+                        <div id="f-4" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">RING</div>
+                        <div id="f-5" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500">PINKY</div>
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
 
             <!-- Right Telemetry Panel (4 Cols) -->
             <div class="lg:col-span-4 space-y-4">
                 
-                <!-- Live Telemetry Card -->
                 <div class="glass-panel rounded-2xl p-5 border-slate-800 shadow-xl">
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800/80">
                         <h3 class="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
                             <span>⚡</span> LIVE TELEMETRY
                         </h3>
-                        <span class="font-mono text-[10px] text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">60 FPS</span>
+                        <span class="font-mono text-[10px] text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">ACTIVE</span>
                     </div>
                     
                     <div class="space-y-3 font-mono text-xs">
                         <div class="flex justify-between items-center py-1.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Target Pipeline</span>
+                            <span class="text-slate-400">Pipeline ID</span>
                             <span class="text-white font-semibold">{{ project.id[:3].upper() }}</span>
                         </div>
                         <div class="flex justify-between items-center py-1.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Subject Tracking</span>
-                            <span id="tel-hands" class="text-emerald-400 font-semibold">0 Detected</span>
-                        </div>
-                        <div class="flex justify-between items-center py-1.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Engine State</span>
+                            <span class="text-slate-400">Tracking Status</span>
                             <span id="tel-status" class="text-yellow-400">Scanning</span>
                         </div>
                         <div class="py-1.5">
-                            <span class="text-slate-400 block mb-1">Telemetry Log</span>
+                            <span class="text-slate-400 block mb-1">Pipeline Output</span>
                             <div id="tel-log" class="p-2.5 bg-slate-950 rounded-lg border border-slate-800/80 text-cyan-300 text-[11px] truncate">
-                                Engine ready for input
+                                Ready for vision input
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Guide / System Overview -->
                 <div class="glass-panel rounded-2xl p-5 border-slate-800 shadow-xl">
                     <h3 class="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <span>💡</span> SYSTEM INSTRUCTIONS
+                        <span>💡</span> GUIDE
                     </h3>
-                    <div class="text-xs text-slate-400 leading-relaxed space-y-2 font-sans">
-                        {% if 'mouse' in project.id %}
-                        <p>• Move your index fingertip to pilot the virtual pointer across the display.</p>
-                        <p>• Hold over any interactive target for <strong>0.5s</strong> to trigger speech synthesis and relay signals.</p>
-                        {% elif 'volume' in project.id %}
-                        <p>• Raise your hand to scale audio gain up to <strong>100%</strong>.</p>
-                        <p>• Lower your hand to the bottom region to execute a <strong>0% hard mute</strong>.</p>
-                        {% elif 'keyboard' in project.id %}
-                        <p>• Dual-Hand Mode Active: Right index (Cyan) &amp; Left index (Amber).</p>
-                        <p>• Hover either fingertip over a key for <strong>0.4s</strong> to write into the text buffer.</p>
-                        {% else %}
-                        <p>{{ project.desc }}</p>
-                        {% endif %}
+                    <div class="text-xs text-slate-400 leading-relaxed font-sans">
+                        {{ project.desc }}
                     </div>
                 </div>
-
             </div>
 
         </main>
-
-        <!-- Footer Bar -->
-        <footer class="mt-8 pt-4 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono text-slate-500">
-            <span>CLIENT-SIDE MEDIAPIPE CORE</span>
-            <span>BUILD STABLE &bull; 2026</span>
-        </footer>
-
     </div>
 
     <!-- Notification Toast Modal -->
@@ -281,53 +230,21 @@
     </div>
 
     <script>
-        const isMouseProject = {{ 'true' if 'mouse' in project.id else 'false' }};
-        const isVolumeProject = {{ 'true' if 'volume' in project.id else 'false' }};
-        const isKeyboardProject = {{ 'true' if 'keyboard' in project.id else 'false' }};
+        const projectId = "{{ project.id }}";
 
         const video = document.getElementById('cam-video');
         const canvas = document.getElementById('cam-canvas');
         const ctx = canvas.getContext('2d');
-        const cursorRight = document.getElementById('cursor-right');
-        const cursorLeft = document.getElementById('cursor-left');
+        const cursor = document.getElementById('virtual-cursor');
         const loading = document.getElementById('cam-loading');
         const toast = document.getElementById('toast-modal');
         const toastText = document.getElementById('toast-text');
 
-        let rightX = window.innerWidth / 2, rightY = window.innerHeight / 2;
-        let leftX = window.innerWidth / 2, leftY = window.innerHeight / 2;
+        let lastX = window.innerWidth / 2;
+        let lastY = window.innerHeight / 2;
 
-        let rightHover = { start: null, target: null };
-        let leftHover = { start: null, target: null };
-
-        let typedBuffer = "";
-        function typeKey(k) {
-            typedBuffer += k;
-            renderType();
-            document.getElementById('tel-log').innerText = `Typed: "${k}"`;
-        }
-        function backspaceType() {
-            typedBuffer = typedBuffer.slice(0, -1);
-            renderType();
-            document.getElementById('tel-log').innerText = `Backspace`;
-        }
-        function clearType() {
-            typedBuffer = "";
-            renderType();
-            document.getElementById('tel-log').innerText = `Buffer Cleared`;
-        }
-        function renderType() {
-            const el = document.getElementById('typed-text');
-            if (el) {
-                el.innerHTML = typedBuffer 
-                    ? `<span class="text-white">${typedBuffer}</span><span class="animate-pulse text-cyan-400">|</span>` 
-                    : `<span class="text-slate-600 text-xs">Hover over letters with either index finger...</span>`;
-            }
-        }
-
-        // Web Audio Synthesizer
+        // Audio Engine
         let audioCtx = null, osc = null, gainNode = null;
-
         function initAudioEngine() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -339,30 +256,17 @@
                 osc.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 osc.start();
-
                 const btn = document.getElementById('audio-toggle-btn');
-                if (btn) {
-                    btn.innerHTML = '<span>🔊</span><span>Audio Active</span>';
-                    btn.classList.replace('bg-cyan-600', 'bg-emerald-600');
-                }
+                if (btn) btn.innerText = 'Audio Active 🔊';
             }
         }
-
         function toggleAudioDemo() {
-            if (!audioCtx) {
-                initAudioEngine();
-            } else if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-                const btn = document.getElementById('audio-toggle-btn');
-                if (btn) btn.innerHTML = '<span>🔊</span><span>Audio Active</span>';
-            } else if (audioCtx.state === 'running') {
-                audioCtx.suspend();
-                const btn = document.getElementById('audio-toggle-btn');
-                if (btn) btn.innerHTML = '<span>🔇</span><span>Audio Muted</span>';
-            }
+            if (!audioCtx) initAudioEngine();
+            else if (audioCtx.state === 'suspended') audioCtx.resume();
+            else if (audioCtx.state === 'running') audioCtx.suspend();
         }
 
-        function handleTargetClick(speechPhrase, displayMsg) {
+        function handlePinchClick(speechPhrase, displayMsg) {
             document.getElementById('tel-log').innerText = displayMsg;
             toastText.innerText = displayMsg;
             toast.classList.remove('translate-y-20', 'opacity-0');
@@ -370,29 +274,9 @@
 
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(speechPhrase);
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function checkHoverClick(x, y, cursorElem, hoverState) {
-            const elem = document.elementFromPoint(x, y);
-            const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
-
-            if (clickable) {
-                if (hoverState.target !== clickable) {
-                    hoverState.target = clickable;
-                    hoverState.start = Date.now();
-                } else if (Date.now() - hoverState.start >= (isKeyboardProject ? 400 : 500)) {
-                    cursorElem.classList.add('clicking');
-                    clickable.click();
-                    setTimeout(() => cursorElem.classList.remove('clicking'), 200);
-                    hoverState.start = Date.now() + (isKeyboardProject ? 700 : 1200);
-                }
-            } else {
-                hoverState.target = null;
-                hoverState.start = null;
+                const u = new SpeechSynthesisUtterance(speechPhrase);
+                u.rate = 1.0;
+                window.speechSynthesis.speak(u);
             }
         }
 
@@ -402,69 +286,44 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-            const numHands = results.multiHandLandmarks ? results.multiHandLandmarks.length : 0;
-            document.getElementById('tel-hands').innerText = `${numHands} Active`;
-
-            if (numHands > 0) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 document.getElementById('tel-status').innerText = 'Locked';
+                const lms = results.multiHandLandmarks[0];
 
-                const lms1 = results.multiHandLandmarks[0];
-                const idx1 = lms1[8];
-                const px1 = idx1.x * canvas.width;
-                const py1 = idx1.y * canvas.height;
+                const thumb = lms[4];
+                const index = lms[8];
 
-                // Draw fingertip target marker
-                ctx.beginPath();
-                ctx.arc(px1, py1, 8, 0, 2 * Math.PI);
-                ctx.fillStyle = '#06b6d4';
-                ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#ffffff';
-                ctx.stroke();
+                // Calculate pinch distance between thumb & index
+                const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
 
-                if (isMouseProject || isKeyboardProject) {
-                    cursorRight.style.display = 'block';
-                    const targetX1 = (1.0 - idx1.x) * window.innerWidth;
-                    const targetY1 = idx1.y * window.innerHeight;
-                    rightX += (targetX1 - rightX) * 0.6;
-                    rightY += (targetY1 - rightY) * 0.6;
+                // 1. P01 Virtual Mouse (Pinch Gesture Left Click)
+                if (projectId.includes('p01')) {
+                    cursor.style.display = 'block';
+                    const targetX = (1.0 - index.x) * window.innerWidth;
+                    const targetY = index.y * window.innerHeight;
+                    lastX += (targetX - lastX) * 0.65;
+                    lastY += (targetY - lastY) * 0.65;
 
-                    cursorRight.style.left = rightX + 'px';
-                    cursorRight.style.top = rightY + 'px';
-                    checkHoverClick(rightX, rightY, cursorRight, rightHover);
+                    cursor.style.left = lastX + 'px';
+                    cursor.style.top = lastY + 'px';
+
+                    if (pinchDist < 0.065) {
+                        cursor.classList.add('pinching');
+                        const elem = document.elementFromPoint(lastX, lastY);
+                        const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
+                        if (clickable && !clickable.dataset.clicked) {
+                            clickable.dataset.clicked = "true";
+                            clickable.click();
+                            setTimeout(() => { delete clickable.dataset.clicked; }, 600);
+                        }
+                    } else {
+                        cursor.classList.remove('pinching');
+                    }
                 }
 
-                if (numHands > 1 && isKeyboardProject) {
-                    const lms2 = results.multiHandLandmarks[1];
-                    const idx2 = lms2[8];
-                    const px2 = idx2.x * canvas.width;
-                    const py2 = idx2.y * canvas.height;
-
-                    ctx.beginPath();
-                    ctx.arc(px2, py2, 8, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#f59e0b';
-                    ctx.fill();
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.stroke();
-
-                    cursorLeft.style.display = 'block';
-                    const targetX2 = (1.0 - idx2.x) * window.innerWidth;
-                    const targetY2 = idx2.y * window.innerHeight;
-                    leftX += (targetX2 - leftX) * 0.6;
-                    leftY += (targetY2 - leftY) * 0.6;
-
-                    cursorLeft.style.left = leftX + 'px';
-                    cursorLeft.style.top = leftY + 'px';
-                    checkHoverClick(leftX, leftY, cursorLeft, leftHover);
-                } else {
-                    cursorLeft.style.display = 'none';
-                }
-
-                if (isVolumeProject) {
-                    cursorRight.style.display = 'none';
-                    cursorLeft.style.display = 'none';
-                    const normalizedHeight = (0.85 - idx1.y) / (0.85 - 0.15);
+                // 2. P02 Virtual Volume
+                if (projectId.includes('p02')) {
+                    const normalizedHeight = (0.85 - index.y) / (0.85 - 0.15);
                     const clampedHeight = Math.min(1.0, Math.max(0.0, normalizedHeight));
                     const volPct = Math.round(clampedHeight * 100);
 
@@ -478,12 +337,55 @@
                         gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
                         gainNode.gain.linearRampToValueAtTime(realGain, audioCtx.currentTime + 0.05);
                     }
-                    document.getElementById('tel-log').innerText = volPct === 0 ? 'Muted (Silence)' : `Gain Level: ${volPct}%`;
+                    document.getElementById('tel-log').innerText = `Volume: ${volPct}%`;
                 }
+
+                // 3. P03 Virtual Brightness Control
+                if (projectId.includes('p03')) {
+                    // Pinch distance mapping to brightness (0.03 to 0.25)
+                    const bVal = Math.min(100, Math.max(10, Math.round(((pinchDist - 0.03) / 0.22) * 100)));
+                    const meter = document.getElementById('brightness-meter');
+                    const label = document.getElementById('brightness-pct');
+                    const preview = document.getElementById('brightness-preview');
+                    if (meter) meter.style.width = bVal + '%';
+                    if (label) label.innerText = bVal + '%';
+                    if (preview) preview.style.opacity = (bVal / 100).toString();
+                    document.getElementById('tel-log').innerText = `Brightness: ${bVal}%`;
+                }
+
+                // 4. P04 Finger Counter
+                if (projectId.includes('p04')) {
+                    let count = 0;
+                    const isThumb = Math.abs(lms[4].x - lms[2].x) > Math.abs(lms[3].x - lms[2].x) * 1.1;
+                    if (isThumb) count++;
+                    const tips = [8, 12, 16, 20];
+                    tips.forEach((t, i) => {
+                        const extended = lms[t].y < lms[t - 2].y;
+                        if (extended) count++;
+                        const el = document.getElementById(`f-${i + 2}`);
+                        if (el) el.className = extended ? "p-3 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" : "p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500";
+                    });
+                    const thEl = document.getElementById('f-1');
+                    if (thEl) thEl.className = isThumb ? "p-3 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" : "p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-500";
+                    
+                    const badge = document.getElementById('finger-count-badge');
+                    if (badge) badge.innerText = count;
+                    document.getElementById('tel-log').innerText = `Extended Count: ${count}/5`;
+                }
+
+                // Draw Landmark Points
+                [4, 8, 12, 16, 20].forEach(tip => {
+                    const px = lms[tip].x * canvas.width;
+                    const py = lms[tip].y * canvas.height;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.fill();
+                });
+
             } else {
-                cursorRight.style.display = 'none';
-                cursorLeft.style.display = 'none';
-                document.getElementById('tel-status').innerText = 'Searching';
+                cursor.style.display = 'none';
+                document.getElementById('tel-status').innerText = 'Scanning';
             }
             ctx.restore();
         }
@@ -497,7 +399,7 @@
             });
 
             hands.setOptions({
-                maxNumHands: 2,
+                maxNumHands: 1,
                 modelComplexity: 0,
                 minDetectionConfidence: 0.5,
                 minTrackingConfidence: 0.5

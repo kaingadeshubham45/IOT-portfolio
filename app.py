@@ -7,74 +7,74 @@ PROJECTS = {
     'p01_virtual_mouse': {
         'id': 'p01_virtual_mouse',
         'title': 'Virtual Mouse Control',
-        'desc': 'Direct index-finger cursor tracking and auto-hover click.',
+        'desc': 'Navigate cursor with index finger; left-click via thumb-index pinch gesture.',
         'icon': '🖱️'
     },
     'p02_virtual_volume': {
         'id': 'p02_virtual_volume',
         'title': 'Virtual Volume Control',
-        'desc': 'Adjust master audio and send PWM output based on finger gestures.',
+        'desc': 'Logarithmic audio gain modulation via vertical hand elevation.',
         'icon': '🔊'
     },
-    'p03_virtual_keyboard': {
-        'id': 'p03_virtual_keyboard',
-        'title': 'Virtual Keyboard Automation',
-        'desc': 'Touchless interactive on-screen key typing with dual-hand tracking.',
-        'icon': '⌨️'
+    'p03_virtual_brightness': {
+        'id': 'p03_virtual_brightness',
+        'title': 'Virtual Brightness Control',
+        'desc': 'Adjust display luminosity and backlight levels using pinch distance metrics.',
+        'icon': '☀️'
     },
     'p04_finger_counter': {
         'id': 'p04_finger_counter',
-        'title': 'Finger Counter & Relay Controller',
-        'desc': 'Trigger multi-channel IoT relays by counting extended fingers.',
+        'title': 'Finger Counter & Showcase',
+        'desc': 'Vector landmark tracking detecting extended finger count from 1 to 5.',
         'icon': '🖐️'
     },
-    'p05_presentation_controller': {
-        'id': 'p05_presentation_controller',
-        'title': 'Hand Gesture Presentation Control',
-        'desc': 'Slide deck navigation using left/right swipe gestures.',
-        'icon': '📊'
+    'p05_rock_paper_scissors': {
+        'id': 'p05_rock_paper_scissors',
+        'title': 'Rock Paper Scissors AI',
+        'desc': 'Interactive hand gesture showdown playing against an automated AI engine.',
+        'icon': '✊'
     },
-    'p06_face_authenticator': {
-        'id': 'p06_face_authenticator',
-        'title': 'Face Recognition Door Lock',
-        'desc': 'IoT solenoid door unlock via facial biometric confirmation.',
-        'icon': '🔓'
+    'p06_face_attendance': {
+        'id': 'p06_face_attendance',
+        'title': 'Face Attendance System',
+        'desc': 'Biometric facial validation with automated attendance logging (Date & Time).',
+        'icon': '📋'
     },
-    'p07_drowsiness_detector': {
-        'id': 'p07_drowsiness_detector',
-        'title': 'Driver Drowsiness Alert System',
-        'desc': 'Detect eye closure rates and trigger buzzer alerts.',
+    'p07_face_mask_detector': {
+        'id': 'p07_face_mask_detector',
+        'title': 'Face Mask Detection',
+        'desc': 'Facial occlusion analysis verifying mask compliance for safety protocols.',
+        'icon': '😷'
+    },
+    'p08_drowsiness_detector': {
+        'id': 'p08_drowsiness_detector',
+        'title': 'Drowsiness Face Detection',
+        'desc': 'Eye Aspect Ratio (EAR) monitoring triggering real-time buzzer alarms.',
         'icon': '⚠️'
     },
-    'p08_pose_tracker': {
-        'id': 'p08_pose_tracker',
-        'title': 'AI Posture Trainer',
-        'desc': 'Real-time spine angle posture correction tracker.',
-        'icon': '🧘'
+    'p09_virtual_drawing': {
+        'id': 'p09_virtual_drawing',
+        'title': 'Virtual Drawing Board',
+        'desc': 'In-air touchless digital canvas drawing via index finger tracking.',
+        'icon': '🎨'
     },
-    'p09_color_tracker': {
-        'id': 'p09_color_tracker',
-        'title': 'Object Color Tracking & Sorting',
-        'desc': 'HSV color sorting to automate conveyor sorting gates.',
-        'icon': '🎯'
+    'p10_presentation_control': {
+        'id': 'p10_presentation_control',
+        'title': 'Gesture Presentation Control',
+        'desc': 'Slide deck navigation using touchless directional swipe gestures.',
+        'icon': '📊'
     },
-    'p10_optical_character': {
-        'id': 'p10_optical_character',
-        'title': 'OCR Text Recognition Scanner',
-        'desc': 'Extract printed labels and numbers from live vision stream.',
-        'icon': '📝'
+    'p11_media_player': {
+        'id': 'p11_media_player',
+        'title': 'Gesture Media Player',
+        'desc': 'Play, pause, skip, and rewind media controls via hand gestures.',
+        'icon': '🎬'
     },
-    'p11_qr_scanner': {
-        'id': 'p11_qr_scanner',
-        'title': 'Smart QR Access Gate',
-        'desc': 'Scan QR codes to authorize IoT barrier gate access.',
-        'icon': '📱'
-    },
-    'p12_smart_surveillance': {
-        'id': 'p12_smart_surveillance',
-        'title': 'Smart Security Surveillance',
-        'desc': 'Motion detection security trigger with snapshot alerts.',
-        'icon': '🚨'
+    'p12_sign_language': {
+        'id': 'p12_sign_language',
+        'title': 'AI Sign Language Recognition',
+        'desc': 'Real-time classification of standard sign language hand alphabet gestures.',
+        'icon': '🤟'
     }
 }
 
