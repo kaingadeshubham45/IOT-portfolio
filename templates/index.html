@@ -61,6 +61,32 @@
             box-shadow: 0 0 25px rgba(6, 182, 212, 0.3);
         }
 
+        /* Launch Engine Highlight Button */
+        .launch-btn {
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            color: #38bdf8;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.1);
+        }
+
+        .holo-card:hover .launch-btn {
+            background: #06b6d4;
+            color: #020617;
+            font-weight: 800;
+            border-color: #38bdf8;
+            box-shadow: 0 0 18px rgba(6, 182, 212, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .launch-btn .arrow-icon {
+            transition: transform 0.25s ease;
+        }
+
+        .holo-card:hover .launch-btn .arrow-icon {
+            transform: translateX(4px);
+        }
+
         .project-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -147,7 +173,7 @@
                 
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-xl shadow-inner">
+                        <div class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-xl shadow-inner group-hover:scale-105 transition-transform">
                             {{ p.icon }}
                         </div>
                         <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-gray-900 text-cyan-400 border border-gray-800 uppercase">
@@ -163,9 +189,15 @@
                     </p>
                 </div>
 
-                <div class="pt-4 mt-3 border-t border-gray-800 flex items-center justify-between font-mono text-xs text-gray-500 group-hover:text-cyan-400">
-                    <span>LAUNCH PROJECT</span>
-                    <span>&rarr;</span>
+                <!-- Highlighted Action Button -->
+                <div class="pt-4 mt-4 border-t border-gray-800/80 flex items-center justify-between">
+                    <div class="launch-btn w-full py-2 px-3 rounded-lg flex items-center justify-between font-mono text-xs">
+                        <span class="flex items-center gap-1.5">
+                            <span>🚀</span>
+                            <span>LAUNCH ENGINE</span>
+                        </span>
+                        <span class="arrow-icon font-bold">&rarr;</span>
+                    </div>
                 </div>
             </a>
             {% endfor %}
