@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} | AI &amp; IoT Hub</title>
+    <title>{{ project.title }} | Edge Vision Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
@@ -23,27 +23,26 @@
             border: 1px solid rgba(51, 65, 85, 0.6);
         }
         
-        /* High-Precision Cursor */
         .v-cursor {
             position: fixed;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             pointer-events: none;
             z-index: 9999;
             transform: translate(-50%, -50%);
             display: none;
-            transition: transform 0.04s ease-out, background 0.1s ease;
+            transition: transform 0.04s ease-out;
             background: rgba(6, 182, 212, 0.9);
             border: 3px solid #38bdf8;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 22px rgba(56, 189, 248, 0.8);
         }
         .v-cursor.pinching {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background: rgba(34, 197, 94, 0.95) !important;
             border-color: #4ade80 !important;
-            box-shadow: 0 0 30px rgba(74, 222, 128, 0.95) !important;
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.9) !important;
         }
 
         #screen-dimmer {
@@ -111,31 +110,28 @@
                     </div>
                 </div>
 
-                <!-- P01: Virtual Mouse Pinch Targets -->
+                <!-- 1. P01: Virtual Mouse Control -->
                 {% if 'p01' in project.id %}
-                <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-3">
-                    <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-                        <span class="text-xs font-mono font-semibold text-slate-400 uppercase tracking-wider">Interactive Left-Click Targets</span>
-                        <span class="text-xs font-mono text-cyan-400">Pinch Thumb + Index to Click</span>
-                    </div>
+                <div class="glass-panel rounded-xl p-4 border-slate-800">
+                    <div class="text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-3">Action Targets (Touch Thumb + Index to Click)</div>
                     <div class="grid grid-cols-3 gap-3">
-                        <button onclick="handlePinchClick('Good Morning! Target 1 triggered via pinch click.', '☀️ Target 1: Good Morning! Clicked!')" class="interactive-elem p-4 rounded-xl bg-slate-900 hover:bg-cyan-950/50 border border-slate-800 hover:border-cyan-500/50 text-xs font-medium transition-all text-center group">
-                            <span class="block text-2xl mb-1 group-hover:scale-110 transition-transform">☀️</span>
-                            <span class="text-slate-200 group-hover:text-cyan-400 font-bold">Good Morning</span>
+                        <button onclick="handlePinchClick('Good Morning! Target 1 triggered.', 'Target 1: Good Morning! ☀️')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-cyan-950/40 border border-slate-800 hover:border-cyan-500/50 text-xs font-medium transition-all text-center">
+                            <span class="block text-base mb-1">☀️</span>
+                            <span>Good Morning</span>
                         </button>
-                        <button onclick="handlePinchClick('IoT Relay Channel 1 Toggled.', '⚡ Target 2: Relay Channel Active!')" class="interactive-elem p-4 rounded-xl bg-slate-900 hover:bg-emerald-950/50 border border-slate-800 hover:border-emerald-500/50 text-xs font-medium transition-all text-center group">
-                            <span class="block text-2xl mb-1 group-hover:scale-110 transition-transform">⚡</span>
-                            <span class="text-slate-200 group-hover:text-emerald-400 font-bold">Toggle Relay</span>
+                        <button onclick="handlePinchClick('Relay Channel Activated.', 'Target 2: Relay Toggled ⚡')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-emerald-950/40 border border-slate-800 hover:border-emerald-500/50 text-xs font-medium transition-all text-center">
+                            <span class="block text-base mb-1">⚡</span>
+                            <span>Toggle Relay</span>
                         </button>
-                        <button onclick="handlePinchClick('Security Frame Snapshot Captured.', '📸 Target 3: Frame Captured!')" class="interactive-elem p-4 rounded-xl bg-slate-900 hover:bg-purple-950/50 border border-slate-800 hover:border-purple-500/50 text-xs font-medium transition-all text-center group">
-                            <span class="block text-2xl mb-1 group-hover:scale-110 transition-transform">📸</span>
-                            <span class="text-slate-200 group-hover:text-purple-400 font-bold">Capture Frame</span>
+                        <button onclick="handlePinchClick('Camera Snapshot Saved.', 'Target 3: Snapshot Saved 📸')" class="interactive-elem p-3.5 rounded-xl bg-slate-900 hover:bg-purple-950/40 border border-slate-800 hover:border-purple-500/50 text-xs font-medium transition-all text-center">
+                            <span class="block text-base mb-1">📸</span>
+                            <span>Capture Frame</span>
                         </button>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- P02: Volume -->
+                <!-- 2. P02: Virtual Volume Control -->
                 {% if 'p02' in project.id %}
                 <div class="glass-panel rounded-xl p-5 border-slate-800">
                     <div class="flex items-center justify-between mb-3">
@@ -158,23 +154,30 @@
                 </div>
                 {% endif %}
 
-                <!-- P03: Brightness -->
+                <!-- 3. P03: Virtual Brightness Control -->
                 {% if 'p03' in project.id %}
                 <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                         <div>
                             <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Full-Display Luminance Attenuation</h4>
-                            <p class="text-xs text-slate-500">Spread fingers to brighten; pinch closed for blackout.</p>
+                            <p class="text-xs text-slate-500">Spread fingers to brighten; touch closed for blackout.</p>
                         </div>
                         <span id="brightness-pct" class="font-mono text-amber-400 font-bold text-lg">100%</span>
                     </div>
+                    
                     <div class="w-full bg-slate-950 h-8 rounded-xl overflow-hidden border border-slate-800 p-1">
                         <div id="brightness-meter" class="bg-gradient-to-r from-amber-600 via-amber-400 to-yellow-200 h-full rounded-lg transition-all duration-75" style="width: 100%;"></div>
+                    </div>
+                    
+                    <div class="flex justify-between font-mono text-[11px] text-slate-400">
+                        <span>0% (Pitch Dark)</span>
+                        <span>50%</span>
+                        <span>100% (Full Brightness)</span>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- P04: Finger Counter -->
+                <!-- 4. P04: Finger Counter -->
                 {% if 'p04' in project.id %}
                 <div class="glass-panel rounded-xl p-5 border-slate-800 space-y-4">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -194,7 +197,7 @@
                 </div>
                 {% endif %}
 
-                <!-- P05: Rock Paper Scissors -->
+                <!-- 5. P05: Rock Paper Scissors -->
                 {% if 'p05' in project.id %}
                 <div class="glass-panel rounded-2xl p-5 border-slate-800 space-y-4 shadow-2xl">
                     <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
@@ -251,15 +254,11 @@
                             <span class="text-white font-semibold">{{ project.id[:3].upper() }}</span>
                         </div>
                         <div class="flex justify-between items-center py-1.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Pinch Distance</span>
-                            <span id="tel-pinch" class="text-emerald-400 font-semibold">--</span>
-                        </div>
-                        <div class="flex justify-between items-center py-1.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Mouse Gesture</span>
-                            <span id="tel-state" class="text-yellow-400">Hovering</span>
+                            <span class="text-slate-400">Tracking Status</span>
+                            <span id="tel-status" class="text-yellow-400">Scanning</span>
                         </div>
                         <div class="py-1.5">
-                            <span class="text-slate-400 block mb-1">Event Log</span>
+                            <span class="text-slate-400 block mb-1">Pipeline Output</span>
                             <div id="tel-log" class="p-2.5 bg-slate-950 rounded-lg border border-slate-800/80 text-cyan-300 text-[11px] truncate">
                                 Ready for vision input
                             </div>
@@ -269,11 +268,15 @@
 
                 <div class="glass-panel rounded-2xl p-5 border-slate-800 shadow-xl">
                     <h3 class="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <span>💡</span> SYSTEM INSTRUCTIONS
+                        <span>💡</span> GUIDE
                     </h3>
-                    <div class="text-xs text-slate-400 leading-relaxed font-sans space-y-2">
-                        <p>• <strong>Move Cursor:</strong> Point your index finger to guide the cyan cursor across the page.</p>
-                        <p>• <strong>Left Click:</strong> Pinch your <strong>Thumb &amp; Index finger</strong> together quickly over any button or link to click it.</p>
+                    <div class="text-xs text-slate-400 leading-relaxed font-sans">
+                        {% if 'p01' in project.id %}
+                        • <strong>Move Cursor:</strong> Point your index finger to guide the cyan cursor across the page.<br><br>
+                        • <strong>Left Click:</strong> Physically <strong>TOUCH</strong> your Thumb and Index fingertips together over any target to click.
+                        {% else %}
+                        {{ project.desc }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -297,6 +300,7 @@
         const loading = document.getElementById('cam-loading');
         const toast = document.getElementById('toast-modal');
         const toastText = document.getElementById('toast-text');
+        const screenDimmer = document.getElementById('screen-dimmer');
 
         let lastX = window.innerWidth / 2;
         let lastY = window.innerHeight / 2;
@@ -317,6 +321,79 @@
                 osc.start();
                 osc.stop(aCtx.currentTime + 0.08);
             } catch (e) {}
+        }
+
+        // P05 State
+        let detectedRPS = "ROCK";
+        let rpsHoldCurrent = null;
+        let rpsHoldStart = null;
+        let rpsLocked = false;
+        let playerScore = 0;
+        let aiScore = 0;
+        let winStreak = 0;
+
+        function resetRPSScore() {
+            playerScore = 0; aiScore = 0; winStreak = 0;
+            document.getElementById('rps-player-score').innerText = '0';
+            document.getElementById('rps-ai-score').innerText = '0';
+            document.getElementById('rps-streak').innerText = '🔥 0';
+            document.getElementById('rps-result').innerText = 'SCORE RESET';
+        }
+
+        function executeRPSBattle(lockedPlayerMove) {
+            rpsLocked = true;
+            const moves = ["ROCK ✊", "PAPER ✋", "SCISSORS ✌️"];
+            const ai = moves[Math.floor(Math.random() * moves.length)];
+            document.getElementById('ai-move').innerText = ai;
+
+            let outcome = "TIE MATCH ⚖️";
+            let speech = "It is a tie!";
+            if ((lockedPlayerMove === "ROCK" && ai.includes("SCISSORS")) ||
+                (lockedPlayerMove === "PAPER" && ai.includes("ROCK")) ||
+                (lockedPlayerMove === "SCISSORS" && ai.includes("PAPER"))) {
+                outcome = "YOU WIN! 🎉";
+                speech = `You win! ${lockedPlayerMove} beats ${ai.split(' ')[0]}`;
+                playerScore++; winStreak++;
+            } else if (!ai.includes(lockedPlayerMove)) {
+                outcome = "AI WINS 🤖";
+                speech = `AI wins! ${ai.split(' ')[0]} beats ${lockedPlayerMove}`;
+                aiScore++; winStreak = 0;
+            }
+
+            document.getElementById('rps-player-score').innerText = playerScore;
+            document.getElementById('rps-ai-score').innerText = aiScore;
+            document.getElementById('rps-streak').innerText = `🔥 ${winStreak}`;
+            document.getElementById('rps-result').innerText = outcome;
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(speech);
+                window.speechSynthesis.speak(u);
+            }
+            setTimeout(() => { rpsLocked = false; rpsHoldStart = null; document.getElementById('rps-result').innerText = "HOLD FOR 3s AGAIN"; }, 3000);
+        }
+
+        // Web Audio Synthesizer (P02)
+        let audioCtx = null, osc = null, gainNode = null;
+        function initAudioEngine() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                osc = audioCtx.createOscillator();
+                gainNode = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                const btn = document.getElementById('audio-toggle-btn');
+                if (btn) btn.innerText = 'Audio Active 🔊';
+            }
+        }
+        function toggleAudioDemo() {
+            if (!audioCtx) initAudioEngine();
+            else if (audioCtx.state === 'suspended') audioCtx.resume();
+            else if (audioCtx.state === 'running') audioCtx.suspend();
         }
 
         function handlePinchClick(speechPhrase, displayMsg) {
@@ -340,86 +417,198 @@
             ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                document.getElementById('tel-status').innerText = 'Locked';
                 const lms = results.multiHandLandmarks[0];
 
+                const wrist = lms[0];
                 const thumbTip = lms[4];
+                const thumbIP = lms[3];
                 const indexTip = lms[8];
+                const pinkyMCP = lms[17];
 
-                // Screen mapping using index finger position
-                const targetX = (1.0 - indexTip.x) * window.innerWidth;
-                const targetY = indexTip.y * window.innerHeight;
-                lastX += (targetX - lastX) * 0.7;
-                lastY += (targetY - lastY) * 0.7;
-
-                // Euclidean distance between thumb and index
                 const pinchDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
-                const pinchLabel = document.getElementById('tel-pinch');
-                if (pinchLabel) pinchLabel.innerText = pinchDist.toFixed(3);
 
-                // 1. P01 Virtual Mouse Mode (Pinch to Left Click)
+                // Landmark Extension Rigorous Vector Logic
+                let count = 0;
+                const palmScale = Math.hypot(wrist.x - lms[9].x, wrist.y - lms[9].y);
+                const distThumbToPinky = Math.hypot(thumbTip.x - pinkyMCP.x, thumbTip.y - pinkyMCP.y);
+                const isThumbOpen = distThumbToPinky > palmScale * 0.72;
+                if (isThumbOpen) count++;
+
+                const tips = [8, 12, 16, 20];
+                const pips = [6, 10, 14, 18];
+                const activeFingers = [isThumbOpen];
+
+                tips.forEach((t, i) => {
+                    const isExtended = (lms[t].y < lms[pips[i]].y);
+                    if (isExtended) count++;
+                    activeFingers.push(isExtended);
+
+                    const el = document.getElementById(`f-${i + 2}`);
+                    if (el) {
+                        el.className = isExtended 
+                            ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
+                            : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
+                    }
+                });
+
+                const thEl = document.getElementById('f-1');
+                if (thEl) {
+                    thEl.className = isThumbOpen 
+                        ? "p-3.5 bg-emerald-950 border border-emerald-500 rounded-xl text-emerald-400 font-bold" 
+                        : "p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 font-bold";
+                }
+
+                // 1. P01 Virtual Mouse Mode (Strict Physical Touch to Click)
                 if (projectId.includes('p01')) {
                     cursor.style.display = 'block';
+                    const targetX = (1.0 - indexTip.x) * window.innerWidth;
+                    const targetY = indexTip.y * window.innerHeight;
+                    lastX += (targetX - lastX) * 0.65;
+                    lastY += (targetY - lastY) * 0.65;
+
                     cursor.style.left = lastX + 'px';
                     cursor.style.top = lastY + 'px';
 
-                    // Pinch Threshold: Distance < 0.055 indicates contact
-                    if (pinchDist < 0.055) {
+                    // Pinch Threshold: Distance <= 0.025 requires fingertips to visibly overlap/touch
+                    if (pinchDist <= 0.025) {
                         if (!isPinching) {
                             isPinching = true;
                             cursor.classList.add('pinching');
-                            document.getElementById('tel-state').innerText = 'LEFT CLICK 🟢';
-                            document.getElementById('tel-state').className = 'text-emerald-400 font-bold';
                             playClickSound();
 
-                            // Trigger real browser click at cursor coordinates
                             const elem = document.elementFromPoint(lastX, lastY);
                             const clickable = elem ? elem.closest('button, a, .interactive-elem') : null;
-                            if (clickable) {
+                            if (clickable && !clickable.dataset.clicked) {
+                                clickable.dataset.clicked = "true";
                                 clickable.click();
-                                clickable.classList.add('ring-4', 'ring-emerald-400');
-                                setTimeout(() => clickable.classList.remove('ring-4', 'ring-emerald-400'), 250);
+                                setTimeout(() => { delete clickable.dataset.clicked; }, 600);
                             }
                         }
                     } else {
                         if (isPinching) {
                             isPinching = false;
                             cursor.classList.remove('pinching');
-                            document.getElementById('tel-state').innerText = 'Hovering';
-                            document.getElementById('tel-state').className = 'text-yellow-400';
                         }
                     }
                 }
 
-                // Render landmarks on video stream
-                const pxThumb = thumbTip.x * canvas.width;
-                const pyThumb = thumbTip.y * canvas.height;
-                const pxIndex = indexTip.x * canvas.width;
-                const pyIndex = indexTip.y * canvas.height;
+                // 2. P02 Virtual Volume
+                if (projectId.includes('p02')) {
+                    const normalizedHeight = (0.85 - indexTip.y) / (0.85 - 0.15);
+                    const clampedHeight = Math.min(1.0, Math.max(0.0, normalizedHeight));
+                    const volPct = Math.round(clampedHeight * 100);
 
-                // Connecting line
-                ctx.beginPath();
-                ctx.moveTo(pxThumb, pyThumb);
-                ctx.lineTo(pxIndex, pyIndex);
-                ctx.strokeStyle = pinchDist < 0.055 ? '#22c55e' : '#38bdf8';
-                ctx.lineWidth = 3;
-                ctx.stroke();
+                    const meter = document.getElementById('volume-meter-large');
+                    const label = document.getElementById('volume-pct-large');
+                    if (meter) meter.style.width = volPct + '%';
+                    if (label) label.innerText = volPct + '%';
 
-                // Draw points
-                [thumbTip, indexTip].forEach(pt => {
+                    let realGain = clampedHeight > 0.05 ? Math.pow(clampedHeight, 3) : 0.0;
+                    if (gainNode && audioCtx && audioCtx.state === 'running') {
+                        gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                        gainNode.gain.linearRampToValueAtTime(realGain, audioCtx.currentTime + 0.05);
+                    }
+                    document.getElementById('tel-log').innerText = `Volume: ${volPct}%`;
+                }
+
+                // 3. P03 Virtual Brightness
+                if (projectId.includes('p03')) {
+                    // Update bounds: 0.025 (touching) to 0.22 (wide open)
+                    const normalized = (pinchDist - 0.025) / (0.22 - 0.025);
+                    const bVal = Math.min(100, Math.max(0, Math.round(normalized * 100)));
+                    
+                    const meter = document.getElementById('brightness-meter');
+                    const label = document.getElementById('brightness-pct');
+                    if (meter) meter.style.width = bVal + '%';
+                    if (label) label.innerText = bVal + '%';
+
+                    if (screenDimmer) {
+                        const dimOpacity = (100 - bVal) / 100 * 0.94;
+                        screenDimmer.style.opacity = dimOpacity.toString();
+                    }
+                    document.getElementById('tel-log').innerText = bVal === 0 ? 'Blackout (0%)' : `Luminance: ${bVal}%`;
+                }
+
+                // 4. P04 Finger Counter
+                if (projectId.includes('p04')) {
+                    const badge = document.getElementById('finger-count-badge');
+                    if (badge) badge.innerText = count;
+                    document.getElementById('tel-log').innerText = `Active Fingers: ${count}/5`;
+                }
+
+                // 5. P05 3-Second Hold Rock Paper Scissors
+                if (projectId.includes('p05')) {
+                    if (count === 0) detectedRPS = "ROCK";
+                    else if (count === 2 && activeFingers[1] && activeFingers[2]) detectedRPS = "SCISSORS";
+                    else if (count >= 4) detectedRPS = "PAPER";
+
+                    const moveEl = document.getElementById('player-move');
+                    if (moveEl) moveEl.innerText = `${detectedRPS} ${detectedRPS === 'ROCK' ? '✊' : detectedRPS === 'PAPER' ? '✋' : '✌️'}`;
+
+                    if (!rpsLocked) {
+                        if (rpsHoldCurrent !== detectedRPS) {
+                            rpsHoldCurrent = detectedRPS;
+                            rpsHoldStart = Date.now();
+                        } else if (rpsHoldStart) {
+                            const elapsed = Date.now() - rpsHoldStart;
+                            const pct = Math.min(100, (elapsed / 3000) * 100);
+                            const sec = (elapsed / 1000).toFixed(1);
+
+                            const pBar = document.getElementById('rps-progress-bar');
+                            const tText = document.getElementById('rps-timer-text');
+                            if (pBar) pBar.style.width = pct + '%';
+                            if (tText) tText.innerText = `${sec}s / 3.0s`;
+
+                            // Trigger shuffle animation for AI
+                            const aiShuffles = ["ROCK ✊", "PAPER ✋", "SCISSORS ✌️"];
+                            document.getElementById('ai-move').innerText = aiShuffles[Math.floor((elapsed / 200) % 3)];
+
+                            // 3.0s Hold Reached -> Lock & Execute!
+                            if (elapsed >= 3000) {
+                                executeRPSBattle(detectedRPS);
+                            }
+                        }
+                    }
+                }
+
+                // Draw Landmark Points
+                [4, 8, 12, 16, 20].forEach(tip => {
+                    const px = lms[tip].x * canvas.width;
+                    const py = lms[tip].y * canvas.height;
                     ctx.beginPath();
-                    ctx.arc(pt.x * canvas.width, pt.y * canvas.height, 7, 0, 2 * Math.PI);
-                    ctx.fillStyle = pinchDist < 0.055 ? '#22c55e' : '#06b6d4';
+                    ctx.arc(px, py, 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = (projectId.includes('p01') && pinchDist <= 0.025 && (tip === 4 || tip === 8)) ? '#22c55e' : '#06b6d4';
                     ctx.fill();
-                    ctx.strokeStyle = '#ffffff';
+                });
+
+                if (projectId.includes('p01') || projectId.includes('p03')) {
+                    const pxThumb = thumbTip.x * canvas.width;
+                    const pyThumb = thumbTip.y * canvas.height;
+                    const pxIndex = indexTip.x * canvas.width;
+                    const pyIndex = indexTip.y * canvas.height;
+                    ctx.beginPath();
+                    ctx.moveTo(pxThumb, pyThumb);
+                    ctx.lineTo(pxIndex, pyIndex);
+                    ctx.strokeStyle = pinchDist <= 0.025 ? '#22c55e' : '#38bdf8';
                     ctx.lineWidth = 2;
                     ctx.stroke();
-                });
+                }
 
             } else {
                 cursor.style.display = 'none';
                 isPinching = false;
-                const stateEl = document.getElementById('tel-state');
-                if (stateEl) stateEl.innerText = 'Scanning';
+                document.getElementById('tel-status').innerText = 'Scanning';
+                const badge = document.getElementById('finger-count-badge');
+                if (badge) badge.innerText = "0";
+
+                if (projectId.includes('p05') && !rpsLocked) {
+                    rpsHoldStart = null;
+                    const pBar = document.getElementById('rps-progress-bar');
+                    const tText = document.getElementById('rps-timer-text');
+                    if (pBar) pBar.style.width = '0%';
+                    if (tText) tText.innerText = '0.0s / 3.0s';
+                }
             }
             ctx.restore();
         }
